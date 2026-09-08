@@ -45,16 +45,11 @@ body {
   inset: 0;
   z-index: -2;
   pointer-events: none;
-  background:
-    repeating-linear-gradient(0deg, transparent 0 119px, #405f8d1c 120px 121px),
-    linear-gradient(
-      90deg,
-      transparent calc(50% - 216px),
-      #405f8d0d calc(50% - 216px) calc(50% - 215px),
-      transparent calc(50% - 215px) calc(50% + 215px),
-      #405f8d0d calc(50% + 215px) calc(50% + 216px),
-      transparent calc(50% + 216px)
-    );
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0 119px,
+    #405f8d1c 120px 121px
+  );
 }
 header {
   display: flex;

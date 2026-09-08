@@ -23,10 +23,18 @@ export interface ClearanceResult {
 export class PipeManager {
   readonly pipes: PipePair[] = [];
   private nextId = 0;
+  private viewportLeft: number = 0;
+  private viewportRight: number = CONFIG.width;
   constructor(
     private readonly random: SeededRandom,
     private readonly director = new EventDirector(random),
   ) {}
+  setViewportBounds(left: number, right: number): void {
+    if (!Number.isFinite(left) || !Number.isFinite(right) || right <= left)
+      return;
+    this.viewportLeft = Math.min(0, left);
+    this.viewportRight = Math.max(CONFIG.width, right);
+  }
   update(dt: number, difficulty: Difficulty, clearances = 0): void {
     for (const pipe of this.pipes) {
       pipe.x -= difficulty.speed * dt;
@@ -42,10 +50,13 @@ export class PipeManager {
         );
       }
     }
-    while (this.pipes[0] && this.pipes[0].x + CONFIG.pipeWidth < -30)
+    while (
+      this.pipes[0] &&
+      this.pipes[0].x + CONFIG.pipeWidth < this.viewportLeft - 30
+    )
       this.pipes.shift();
     const last = this.pipes.at(-1);
-    if (!last || last.x <= CONFIG.width - difficulty.spacing) {
+    if (!last || last.x <= this.viewportRight - difficulty.spacing) {
       const half = difficulty.gap / 2;
       const previousY = last?.baseGapY ?? 340;
       const min = Math.max(125 + half, previousY - difficulty.maxGapDelta);

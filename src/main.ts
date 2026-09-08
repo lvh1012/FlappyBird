@@ -72,9 +72,10 @@ try {
     });
   const draw = (dt: number): void => {
     renderer.draw(game, effects, storage.getBest(), manualPause);
-    debug?.draw(c, game, dt, viewport.dpr);
+    debug?.draw(c, game, dt, viewport.dpr, viewport.left, viewport.width);
   };
   const loop = new GameLoop((dt) => {
+    game.pipes.setViewportBounds(viewport.left, viewport.right);
     game.update(dt);
     effects.update(dt);
   }, draw);

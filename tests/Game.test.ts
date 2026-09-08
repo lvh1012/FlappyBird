@@ -50,6 +50,16 @@ it('scores each pair exactly once and keeps bounded unique pipes', () => {
   expect(total).toBeGreaterThan(50);
   expect(ids.size).toBeGreaterThan(total);
 });
+it('fills an expanded viewport with upcoming pipes', () => {
+  const pipes = new PipeManager(new SeededRandom(7)),
+    right = 1458;
+  pipes.setViewportBounds(-180, right);
+  for (let i = 0; i < 8; i++) pipes.update(0, getDifficulty(0));
+  expect(pipes.pipes.length).toBeGreaterThan(1);
+  expect(pipes.pipes.at(-1)?.x).toBeGreaterThan(
+    right - getDifficulty(0).spacing,
+  );
+});
 it('collision wins over scoring on the same tick', () => {
   const game = new Game(1);
   game.action();

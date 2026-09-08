@@ -25,13 +25,16 @@ export class BlueprintRenderer {
     this.background = new BackgroundRenderer(seed);
   }
   draw(game: Game, effects: Effects, best: number, paused: boolean): void {
-    const c = this.c;
+    const c = this.c,
+      left = this.viewport.left,
+      right = this.viewport.right,
+      width = this.viewport.width;
     this.viewport.begin();
     c.save();
     c.beginPath();
-    c.rect(0, 0, CONFIG.width, CONFIG.height);
+    c.rect(left, 0, width, CONFIG.height);
     c.clip();
-    this.background.draw(c);
+    this.background.draw(c, left, right);
     c.save();
     c.translate(effects.shake.offset, 0);
     c.lineWidth = 0.9;
@@ -103,9 +106,9 @@ export class BlueprintRenderer {
         22,
         INK,
       );
-    this.ground(game.groundOffset);
+    this.ground(game.groundOffset, left, right);
     c.restore();
-    drawUi(c, game, best, paused, effects.scoreAge);
+    drawUi(c, game, best, paused, effects.scoreAge, left, width);
     c.restore();
   }
   private challengeField(
@@ -226,16 +229,17 @@ export class BlueprintRenderer {
       c.stroke();
     }
   }
-  private ground(offset: number): void {
+  private ground(offset: number, left: number, right: number): void {
     const c = this.c;
     c.fillStyle = PAPER;
-    c.fillRect(0, CONFIG.ground, 432, 64);
+    c.fillRect(left, CONFIG.ground, right - left, 64);
     c.strokeStyle = CYAN;
     c.lineWidth = 0.6;
-    for (let x = -48 - offset; x < 480; x += 16)
+    const firstHatch = Math.floor((left - offset) / 16) * 16;
+    for (let x = firstHatch; x < right + 32; x += 16)
       sketchLine(c, x, CONFIG.ground + 24, x + 22, CONFIG.ground + 2, 3);
     c.strokeStyle = INK;
-    sketchLine(c, 0, CONFIG.ground, 432, CONFIG.ground, 3);
-    sketchLine(c, 0, CONFIG.ground + 27, 432, CONFIG.ground + 27, 4);
+    sketchLine(c, left, CONFIG.ground, right, CONFIG.ground, 3);
+    sketchLine(c, left, CONFIG.ground + 27, right, CONFIG.ground + 27, 4);
   }
 }

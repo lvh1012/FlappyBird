@@ -20,7 +20,7 @@ npm run preview
 ## Điều khiển
 
 - Visual theme: giấy ngà dịu `#ECE6D2`, nét bút bi xanh `#1E4F9A`, grid xanh nhạt chạy liên tục toàn viewport; lớp grain được tạo một lần nên không nhấp nháy.
-- Canvas phủ viewport, nét bút bi xanh trên giấy ngà. World vẫn giữ 9:16 và được clip để không lộ thêm pipe trên màn hình rộng.
+- Canvas phủ viewport, nét bút bi xanh trên giấy ngà. World giữ chiều cao logic 768, có chiều rộng tối thiểu 432 và tự mở rộng theo aspect ratio để gameplay phủ ngang tablet/desktop mà không kéo giãn bird hay pipe.
 - Mobile portrait thu gọn chrome; landscape thấp chuyển controls sang bên phải. Nút Fullscreen chỉ hiện khi browser hỗ trợ, giữ controls trong fullscreen container.
 - Xoay màn hình hoặc chuyển Fullscreen khi đang chơi sẽ pause; chủ động Resume để tiếp tục. Restart trong lúc chơi chỉ khả dụng sau khi pause để tránh bấm nhầm.
 
@@ -90,7 +90,7 @@ Source được phát triển qua branch `feat/flappy-blueprint` và review bằ
 
 - `game/Game.ts` là simulation không phụ thuộc DOM/Canvas; phát callback typed cho flap, score, collision, restart. State transitions tập trung, collision được xử lý trước scoring.
 - `GameLoop` sở hữu duy nhất một RAF. Fixed step 1/120 giây, frame delta và accumulator cap 50 ms, tối đa 6 update mỗi frame. Lag dài làm simulation chậm lại thay vì cố catch-up. Resume xóa timestamp/accumulator.
-- World cố định 432×768; viewport tách CSS pixels, device pixels và logical coordinates. Resize không reset gameplay và redraw khi pause. DPR tối đa 4, backing buffer tối đa 4 triệu pixels (~16 MB RGBA); `setTransform` tránh scale cộng dồn. CSS dùng dynamic viewport units và safe-area insets.
+- Responsive world dùng kích thước tối thiểu 432×768 và mở rộng logical width theo diện tích hiển thị; bird giữ vị trí phản xạ gần mép trái, HUD tự căn giữa, background/ground được tile xuyên suốt và pipe spawn tới mép phải. Viewport tách CSS pixels, device pixels và logical coordinates. Resize không reset gameplay và redraw khi pause. DPR tối đa 4, backing buffer tối đa 4 triệu pixels (~16 MB RGBA); `setTransform` tránh scale cộng dồn. CSS dùng dynamic viewport units và safe-area insets.
 - Bird dùng semi-implicit Euler, gravity 1500, flap -430, fall speed cap 850. Ceiling clamp y/velocity; ground và pipes gây game over. Collision circle radius 13 nhỏ hơn thân vẽ 23×18 để tạo độ dung sai.
 - Difficulty thuần theo bậc mỗi 10 clearance, speed 160–208 và gap 172–142. Gap center delta tăng từ 80 đến tối đa 122 px; moving valve dao động 12–18 px trong giới hạn world an toàn.
 - Seeded PRNG tách simulation, background và effects. Doodle offsets theo seed ổn định, background cache một lần. Cùng seed + input theo simulation tick + config tái lập simulation; không hứa cùng wall-clock input trên mọi frame rate.

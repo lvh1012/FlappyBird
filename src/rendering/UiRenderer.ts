@@ -1,5 +1,6 @@
 import { GameState } from '../game/GameState';
 import type { Game } from '../game/Game';
+import { CONFIG } from '../game/GameConfig';
 import {
   CYAN,
   INK,
@@ -14,7 +15,12 @@ export function drawUi(
   best: number,
   paused: boolean,
   scoreAge: number,
+  viewportLeft: number,
+  viewportWidth: number,
 ): void {
+  const centerOffset = viewportLeft + viewportWidth / 2 - CONFIG.width / 2;
+  c.save();
+  c.translate(centerOffset, 0);
   c.fillStyle = PAPER;
   c.fillRect(45, 20, 342, 70);
   label(c, 'SCORE //', 216, 40, 11, CYAN, 'center');
@@ -96,8 +102,9 @@ export function drawUi(
   }
   if (paused) {
     c.fillStyle = 'rgba(236,230,210,0.94)';
-    c.fillRect(0, 0, 432, 768);
+    c.fillRect(-centerOffset + viewportLeft, 0, viewportWidth, CONFIG.height);
     label(c, 'TEST SUSPENDED', 216, 365, 24, INK, 'center');
     label(c, 'PRESS P OR RESUME', 216, 398, 13, CYAN, 'center');
   }
+  c.restore();
 }

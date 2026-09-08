@@ -31,9 +31,16 @@ export class BackgroundRenderer {
     // Stable paper grain is generated once and never changes gameplay RNG.
     c.fillStyle = 'rgba(83,72,48,0.055)';
     for (let i = 0; i < 1800; i++)
-      c.fillRect(random.range(0, 432), random.range(0, 768), 0.7, 0.7);
+      c.fillRect(
+        random.range(0, CONFIG.width),
+        random.range(0, CONFIG.height),
+        0.7,
+        0.7,
+      );
   }
-  draw(c: CanvasRenderingContext2D): void {
-    c.drawImage(this.paper, 0, 0, CONFIG.width, CONFIG.height);
+  draw(c: CanvasRenderingContext2D, left: number, right: number): void {
+    const firstTile = Math.floor(left / CONFIG.width) * CONFIG.width;
+    for (let x = firstTile; x < right; x += CONFIG.width)
+      c.drawImage(this.paper, x, 0, CONFIG.width, CONFIG.height);
   }
 }
