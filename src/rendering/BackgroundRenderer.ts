@@ -1,6 +1,6 @@
 import { CONFIG } from '../game/GameConfig';
 import { SeededRandom } from '../random/SeededRandom';
-import { CYAN, FAINT, PAPER, crosshair, label } from './BlueprintPrimitives';
+import { PAPER } from './BlueprintPrimitives';
 export class BackgroundRenderer {
   private readonly paper: HTMLCanvasElement;
   constructor(seed: number) {
@@ -32,25 +32,6 @@ export class BackgroundRenderer {
     c.fillStyle = 'rgba(83,72,48,0.055)';
     for (let i = 0; i < 1800; i++)
       c.fillRect(random.range(0, 432), random.range(0, 768), 0.7, 0.7);
-    c.strokeStyle = FAINT;
-    c.lineWidth = 0.6;
-    for (let i = 0; i < 14; i++)
-      crosshair(c, random.range(20, 412), random.range(30, 680), 4);
-    c.setLineDash([8, 8]);
-    c.beginPath();
-    c.moveTo(216, 20);
-    c.lineTo(216, 690);
-    c.stroke();
-    c.beginPath();
-    c.arc(350, 430, 82, 0, Math.PI * 2);
-    c.stroke();
-    c.setLineDash([]);
-    label(c, 'SECTION A—A', 292, 447, 10, FAINT);
-    label(c, 'REF 03-B', 18, 145, 10, FAINT);
-    label(c, 'FLOW →', 340, 165, 11, FAINT);
-    for (let y = 48; y < 690; y += 120) {
-      label(c, String(y).padStart(3, '0'), 8, y, 8, CYAN);
-    }
   }
   draw(c: CanvasRenderingContext2D): void {
     c.drawImage(this.paper, 0, 0, CONFIG.width, CONFIG.height);

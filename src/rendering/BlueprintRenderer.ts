@@ -7,11 +7,8 @@ import type { CanvasViewport } from '../viewport/CanvasViewport';
 import { BackgroundRenderer } from './BackgroundRenderer';
 import {
   CYAN,
-  FAINT,
   INK,
   PAPER,
-  crosshair,
-  dimension,
   ellipse,
   label,
   sketchLine,
@@ -45,10 +42,6 @@ export class BlueprintRenderer {
       this.duct(pipe.x, 0, top, pipe.id, true);
       this.duct(pipe.x, bottom, CONFIG.ground - bottom, pipe.id, false);
       this.challengeMarker(pipe);
-      if (pipe.id % 3 === 0) {
-        dimension(c, pipe.x + 88, top + 8, bottom - 8);
-        label(c, `GAP ${pipe.gapSize}`, pipe.x + 95, pipe.gapY, 9);
-      }
     }
     const bird = game.bird,
       idle = game.state === GameState.Ready;
@@ -82,22 +75,12 @@ export class BlueprintRenderer {
     c.beginPath();
     c.arc(11, -6, 2.4, 0, Math.PI * 2);
     c.fill();
-    c.strokeStyle = CYAN;
-    crosshair(c, 0, 0, 3);
     if (pulse > 0) {
       sketchLine(c, -37, 12, -48, 16, 9);
       sketchLine(c, -34, 18, -42, 23, 10);
     }
     c.restore();
-    if (idle) {
-      c.strokeStyle = FAINT;
-      sketchLine(c, 162, 365, 126, 403);
-      sketchLine(c, 126, 403, 66, 403);
-      label(c, 'FLAP UNIT Mk.II', 58, 420, 11);
-      dimension(c, 289, 309, 374);
-      label(c, 'R = 24', 301, 344, 10);
-      label(c, 'CG', 218, 387, 10);
-    } else if (bird.flapAge < 0.28)
+    if (!idle && bird.flapAge < 0.28)
       label(c, 'LIFT ↑', bird.x + 34, bird.y - 25, 10);
     for (const p of effects.particles.particles) {
       c.globalAlpha = 1 - p.age / p.lifetime;
@@ -164,7 +147,7 @@ export class BlueprintRenderer {
         challenge.perfectHalfHeight * 2,
       );
       c.setLineDash([]);
-      crosshair(c, pipe.x + CONFIG.pipeWidth / 2, targetY, 5);
+      ellipse(c, pipe.x + CONFIG.pipeWidth / 2, targetY, 5, 5);
       label(
         c,
         'BONUS +2',
@@ -180,18 +163,10 @@ export class BlueprintRenderer {
       const top = pipe.gapY - pipe.gapSize / 2;
       c.save();
       c.strokeStyle = CYAN;
-      c.setLineDash([4, 5]);
-      sketchLine(
-        c,
-        pipe.x - 18,
-        pipe.baseGapY,
-        pipe.x + 90,
-        pipe.baseGapY,
-        pipe.id + 72,
-      );
-      c.setLineDash([]);
-      ellipse(c, pipe.x + CONFIG.pipeWidth / 2, top - 28, 13, 13);
-      crosshair(c, pipe.x + CONFIG.pipeWidth / 2, top - 28, 9);
+      const valveX = pipe.x + CONFIG.pipeWidth / 2;
+      ellipse(c, valveX, top - 28, 13, 13);
+      sketchLine(c, valveX - 9, top - 28, valveX + 9, top - 28, pipe.id + 72);
+      sketchLine(c, valveX, top - 37, valveX, top - 19, pipe.id + 73);
       label(
         c,
         'VALVE',
@@ -229,20 +204,6 @@ export class BlueprintRenderer {
       c.arc(boltX, joint + 7, 2, 0, Math.PI * 2);
       c.stroke();
     }
-    c.strokeStyle = FAINT;
-    c.setLineDash([6, 6]);
-    c.beginPath();
-    c.moveTo(x + w / 2, y + 24);
-    c.lineTo(x + w / 2, y + height - 24);
-    c.stroke();
-    c.setLineDash([]);
-    if (height > 100) {
-      c.save();
-      c.translate(x + 25, upper ? y + height - 45 : y + 48);
-      c.rotate(-Math.PI / 2);
-      label(c, `DUCT B-${String(id).padStart(2, '0')}`, 0, 0, 9);
-      c.restore();
-    }
   }
   private ground(offset: number): void {
     const c = this.c;
@@ -255,7 +216,5 @@ export class BlueprintRenderer {
     c.strokeStyle = INK;
     sketchLine(c, 0, CONFIG.ground, 432, CONFIG.ground, 3);
     sketchLine(c, 0, CONFIG.ground + 27, 432, CONFIG.ground + 27, 4);
-    label(c, 'GROUND DATUM ±0.00', 18, 752, 10);
-    label(c, 'SHEET 01 / 01', 414, 752, 9, CYAN, 'right');
   }
 }

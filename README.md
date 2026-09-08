@@ -1,6 +1,6 @@
 # FLAPPY // BLUEPRINT
 
-AERODYNAMIC TEST UNIT — game Canvas 2D mang phong cách bản vẽ kỹ thuật. TypeScript strict + Vite, không có runtime dependency, game engine hoặc raster sprite.
+AERODYNAMIC TEST UNIT — game Canvas 2D mang phong cách phác thảo bút bi trên giấy note. TypeScript strict + Vite, không có runtime dependency, game engine hoặc raster sprite.
 
 ## Chạy và kiểm tra
 
