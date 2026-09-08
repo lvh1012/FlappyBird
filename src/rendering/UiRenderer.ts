@@ -1,6 +1,13 @@
 import { GameState } from '../game/GameState';
 import type { Game } from '../game/Game';
-import { CYAN, INK, NAVY, RED, label, sketchRect } from './BlueprintPrimitives';
+import {
+  CYAN,
+  INK,
+  PAPER,
+  RED,
+  label,
+  sketchRect,
+} from './BlueprintPrimitives';
 export function drawUi(
   c: CanvasRenderingContext2D,
   game: Game,
@@ -8,7 +15,7 @@ export function drawUi(
   paused: boolean,
   scoreAge: number,
 ): void {
-  c.fillStyle = NAVY;
+  c.fillStyle = PAPER;
   c.fillRect(45, 20, 342, 70);
   label(c, 'SCORE //', 216, 40, 11, CYAN, 'center');
   label(
@@ -49,7 +56,7 @@ export function drawUi(
     label(c, 'CALCULATIONS PROBABLY CORRECT', 216, 645, 9, CYAN, 'center');
   }
   if (game.state === GameState.GameOver) {
-    c.fillStyle = 'rgba(12,34,56,0.95)';
+    c.fillStyle = 'rgba(245,240,218,0.97)';
     c.fillRect(44, 215, 344, 340);
     c.strokeStyle = INK;
     sketchRect(c, 44, 215, 344, 340, 11);
@@ -81,7 +88,7 @@ export function drawUi(
     label(c, '↗ RETRY TEST', 216, 499, 17, INK, 'center');
   }
   if (paused) {
-    c.fillStyle = 'rgba(10,28,46,0.86)';
+    c.fillStyle = 'rgba(245,240,218,0.94)';
     c.fillRect(0, 0, 432, 768);
     label(c, 'TEST SUSPENDED', 216, 365, 24, INK, 'center');
     label(c, 'PRESS P OR RESUME', 216, 398, 13, CYAN, 'center');

@@ -8,7 +8,7 @@ import {
   CYAN,
   FAINT,
   INK,
-  NAVY,
+  PAPER,
   crosshair,
   dimension,
   ellipse,
@@ -29,6 +29,10 @@ export class BlueprintRenderer {
   draw(game: Game, effects: Effects, best: number, paused: boolean): void {
     const c = this.c;
     this.viewport.begin();
+    c.save();
+    c.beginPath();
+    c.rect(0, 0, CONFIG.width, CONFIG.height);
+    c.clip();
     this.background.draw(c);
     c.save();
     c.translate(effects.shake.offset, 0);
@@ -54,7 +58,7 @@ export class BlueprintRenderer {
     c.rotate(bird.rotation);
     const pulse = Math.max(0, 1 - bird.flapAge / 0.15);
     c.scale(idle ? 1.8 : 1 + pulse * 0.06, idle ? 1.8 : 1 - pulse * 0.05);
-    c.fillStyle = NAVY;
+    c.fillStyle = PAPER;
     c.beginPath();
     c.ellipse(0, 0, 23, 18, 0, 0, Math.PI * 2);
     c.fill();
@@ -109,6 +113,7 @@ export class BlueprintRenderer {
     this.ground(game.groundOffset);
     c.restore();
     drawUi(c, game, best, paused, effects.scoreAge);
+    c.restore();
   }
   private duct(
     x: number,
@@ -119,14 +124,14 @@ export class BlueprintRenderer {
   ): void {
     const c = this.c,
       w = CONFIG.pipeWidth;
-    c.fillStyle = NAVY;
+    c.fillStyle = PAPER;
     c.fillRect(x, y, w, height);
     c.strokeStyle = INK;
     sketchRect(c, x, y, w, height, id + 2);
     c.strokeStyle = CYAN;
     sketchRect(c, x + 5, y + 3, w - 10, Math.max(0, height - 6), id + 3);
     const joint = upper ? y + height - 20 : y + 4;
-    c.fillStyle = NAVY;
+    c.fillStyle = PAPER;
     c.fillRect(x, joint, w, 15);
     c.strokeStyle = INK;
     sketchRect(c, x, joint, w, 15, id + 13);
@@ -152,7 +157,7 @@ export class BlueprintRenderer {
   }
   private ground(offset: number): void {
     const c = this.c;
-    c.fillStyle = NAVY;
+    c.fillStyle = PAPER;
     c.fillRect(0, CONFIG.ground, 432, 64);
     c.strokeStyle = CYAN;
     c.lineWidth = 0.6;

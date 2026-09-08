@@ -1,173 +1,231 @@
 :root {
-  font-family: 'Courier New', 'Lucida Console', monospace;
-  color: #e4f1e9;
-  background: #081b2c;
+  font-family: 'Courier New', monospace;
+  color: #244b9b;
+  background: #f5f0da;
+  color-scheme: light;
   font-synthesis: none;
-  color-scheme: dark;
 }
 * {
   box-sizing: border-box;
 }
 body {
   margin: 0;
-  min-height: 100svh;
-  display: grid;
-  place-items: center;
-  padding: 24px 14px;
-  background: radial-gradient(ellipse at 50% 30%, #19364e 0%, #081b2c 70%);
 }
 .sheet {
-  width: min(100%, 560px);
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
+  min-height: 240px;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: max(8px, env(safe-area-inset-top))
+    max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom))
+    max(10px, env(safe-area-inset-left));
+  background-color: #f5f0da;
+  background-image:
+    linear-gradient(#637fa912 1px, transparent 1px),
+    linear-gradient(90deg, #637fa912 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+.sheet:fullscreen {
+  width: 100%;
+  height: 100%;
 }
 header {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 0 0 18px;
+  gap: 12px;
+  padding: 4px 8px 10px;
 }
 .mark {
-  border: 1px solid #82bdce;
-  padding: 9px 7px;
-  font-size: 18px;
+  border: 1px solid;
+  padding: 7px;
   transform: rotate(-4deg);
+  font-size: 18px;
 }
 h1 {
-  font-size: clamp(15px, 3.8vw, 22px);
+  font-size: clamp(15px, 3.5vw, 24px);
   margin: 0;
   letter-spacing: -1px;
-  white-space: nowrap;
-}
-h1 span {
-  color: #82bdce;
 }
 header p {
-  font-size: 10px;
-  letter-spacing: 2px;
-  margin: 7px 0 0;
-  color: #82bdce;
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #506b94;
 }
 .revision {
-  font-size: 9px;
-  line-height: 1.8;
-  text-align: right;
   margin-left: auto;
-  color: #82bdce;
+  text-align: right;
+  font-size: 12px;
+  color: #506b94;
 }
 .instrument {
-  border: 1px solid #66869a;
-  padding: 10px;
-  background: #0c253d;
-  box-shadow: 0 20px 80px #0005;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
 }
 .rail {
-  font-size: 9px;
   display: flex;
   justify-content: space-between;
-  padding: 3px 2px 12px;
-  color: #82bdce;
-}
-.live {
-  color: #b7d8bf;
+  gap: 12px;
+  font-size: 12px;
+  color: #506b94;
+  padding: 0 8px 6px;
 }
 .viewport {
-  position: relative;
-  width: min(100%, calc((100svh - 230px) * 432 / 768));
-  min-width: 240px;
-  aspect-ratio: 432/768;
-  margin: auto;
-  outline: 1px solid #426782;
+  min-height: 0;
+  min-width: 0;
+  margin: 0;
+  pointer-events: none;
 }
 canvas {
-  display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
+  z-index: -1;
   touch-action: none;
-  outline: none;
+  pointer-events: auto;
 }
 canvas:focus-visible {
-  outline: 2px solid #e4f1e9;
-  outline-offset: 3px;
+  outline: 2px solid #244b9b;
+  outline-offset: -4px;
 }
 .controls {
   display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
-  margin-top: 12px;
+  padding-top: 8px;
 }
 button {
-  flex: 1;
   min-height: 44px;
-  padding: 8px 4px;
-  background: transparent;
-  border: 1px solid #66869a;
-  color: #e4f1e9;
+  padding: 9px 14px;
+  border: 1px solid #637fa9;
+  border-radius: 3px 6px 3px 5px;
+  background: #f5f0da;
+  color: #244b9b;
   font:
-    11px 'Courier New',
+    bold 13px 'Courier New',
     monospace;
   cursor: pointer;
 }
 button:hover {
-  background: #23445d;
+  background: #e5e8d9;
 }
 button:focus-visible {
-  outline: 2px solid #e4f1e9;
+  outline: 2px solid #244b9b;
   outline-offset: 3px;
 }
-button:first-child {
-  background: #d6e5d8;
-  color: #102d4b;
-  border-color: #d6e5d8;
+button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+[hidden] {
+  display: none !important;
 }
 footer {
   display: flex;
   justify-content: space-between;
-  padding: 15px 2px;
-  font-size: 10px;
-  color: #82bdce;
+  gap: 8px;
+  padding: 8px;
+  font-size: 12px;
+  color: #506b94;
+}
+.rotate-hint {
+  display: none;
 }
 .sr-only {
   position: absolute;
   width: 1px;
   height: 1px;
-  padding: 0;
-  margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
-  border: 0;
 }
 #fatal {
   position: absolute;
   inset: 0;
-  padding: 30px;
-  background: #102d4b;
-  line-height: 1.6;
-  color: #ec9c87;
+  padding: 32px;
+  background: #f5f0da;
+  color: #b04f48;
+  z-index: 5;
+  pointer-events: auto;
 }
-@media (max-width: 420px) {
-  body {
-    padding: 12px 10px;
-  }
-  .revision {
+@media (max-width: 480px) {
+  .revision,
+  .mark,
+  .rail,
+  footer {
     display: none;
   }
-  .rail {
-    font-size: 8px;
+  header {
+    justify-content: center;
+    text-align: center;
+    padding: 0 0 6px;
+  }
+  header p {
+    font-size: 11px;
   }
   .instrument {
-    padding: 8px;
+    grid-template-rows: minmax(0, 1fr) auto;
   }
-  .viewport {
-    width: min(100%, calc((100svh - 210px) * 432 / 768));
+  .controls {
+    gap: 5px;
   }
-  footer {
-    font-size: 8px;
-  }
-  header {
-    padding-bottom: 12px;
+  button {
+    flex: 1;
+    padding: 8px 5px;
+    font-size: 12px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  * {
-    scroll-behavior: auto;
+@media (orientation: landscape) and (max-height: 540px) {
+  header,
+  .rail,
+  footer {
+    display: none;
   }
+  .sheet {
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .instrument {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr);
+    gap: 12px;
+  }
+  .controls {
+    flex-direction: column;
+    justify-content: center;
+    padding: 0;
+  }
+  .controls button {
+    flex: initial;
+  }
+  .rotate-hint {
+    display: block;
+    position: absolute;
+    left: max(12px, env(safe-area-inset-left));
+    bottom: max(12px, env(safe-area-inset-bottom));
+    max-width: 100px;
+    font-size: 12px;
+    color: #506b94;
+    pointer-events: none;
+  }
+}
+@media (max-height: 340px) {
+  .rotate-hint {
+    display: none;
+  }
+  .controls {
+    gap: 4px;
+  }
+}
+.instrument {
+  pointer-events: none;
+}
+.controls {
+  pointer-events: auto;
 }

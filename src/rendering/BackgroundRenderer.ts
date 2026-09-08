@@ -1,6 +1,6 @@
 import { CONFIG } from '../game/GameConfig';
 import { SeededRandom } from '../random/SeededRandom';
-import { CYAN, FAINT, NAVY, crosshair, label } from './BlueprintPrimitives';
+import { CYAN, FAINT, PAPER, crosshair, label } from './BlueprintPrimitives';
 export class BackgroundRenderer {
   private readonly paper: HTMLCanvasElement;
   constructor(seed: number) {
@@ -10,10 +10,10 @@ export class BackgroundRenderer {
     const c = this.paper.getContext('2d');
     if (!c) throw new Error('Canvas 2D unavailable');
     c.scale(2, 2);
-    c.fillStyle = NAVY;
+    c.fillStyle = PAPER;
     c.fillRect(0, 0, CONFIG.width, CONFIG.height);
     for (let x = 0; x <= CONFIG.width; x += 24) {
-      c.strokeStyle = x % 120 === 0 ? '#30536f' : '#203f5b';
+      c.strokeStyle = x % 120 === 0 ? '#B9C8D3' : '#D3DBDF';
       c.lineWidth = 0.5;
       c.beginPath();
       c.moveTo(x, 0);
@@ -21,13 +21,17 @@ export class BackgroundRenderer {
       c.stroke();
     }
     for (let y = 0; y <= CONFIG.height; y += 24) {
-      c.strokeStyle = y % 120 === 0 ? '#30536f' : '#203f5b';
+      c.strokeStyle = y % 120 === 0 ? '#B9C8D3' : '#D3DBDF';
       c.beginPath();
       c.moveTo(0, y);
       c.lineTo(CONFIG.width, y);
       c.stroke();
     }
     const random = new SeededRandom(seed ^ 0xabc123);
+    // Stable paper grain is generated once and never changes gameplay RNG.
+    c.fillStyle = 'rgba(111,94,56,0.045)';
+    for (let i = 0; i < 1800; i++)
+      c.fillRect(random.range(0, 432), random.range(0, 768), 0.7, 0.7);
     c.strokeStyle = FAINT;
     c.lineWidth = 0.6;
     for (let i = 0; i < 14; i++)

@@ -36,6 +36,7 @@ src/storage/ScoreStorage.ts
 src/style.css
 src/utils/math.ts
 src/viewport/CanvasViewport.ts
+src/viewport/fitViewport.ts
 tests/Collision.test.ts
 tests/Difficulty.test.ts
 tests/Game.test.ts
@@ -43,6 +44,7 @@ tests/GameLoop.test.ts
 tests/Physics.test.ts
 tests/ScoreStorage.test.ts
 tests/SeededRandom.test.ts
+tests/Viewport.test.ts
 tsconfig.json
 vite.config.ts
 wrangler.toml

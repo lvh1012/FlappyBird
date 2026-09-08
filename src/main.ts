@@ -24,7 +24,10 @@ try {
   const status = element('status', HTMLParagraphElement),
     restart = element('restart', HTMLButtonElement),
     mute = element('mute', HTMLButtonElement),
-    pause = element('pause', HTMLButtonElement);
+    pause = element('pause', HTMLButtonElement),
+    fullscreen = element('fullscreen', HTMLButtonElement),
+    app = element('app', HTMLElement),
+    stage = element('play-area', HTMLElement);
   const abort = new AbortController(),
     options = { signal: abort.signal };
   const storage = new ScoreStorage(),
@@ -49,6 +52,7 @@ try {
     if (event === 'score' || event === 'collision')
       storage.saveBest(game.score);
     if (event === 'collision') {
+      restart.disabled = false;
       status.textContent = `Test failed. Score ${game.score}. Best ${storage.getBest()}. Press Space to retry.`;
       restart.textContent = '↗ RETRY TEST';
     }
@@ -58,7 +62,7 @@ try {
     }
     if (event === 'flap') restart.textContent = '↗ RESTART';
   });
-  const viewport = new CanvasViewport(canvas, c),
+  const viewport = new CanvasViewport(canvas, c, stage),
     renderer = new BlueprintRenderer(c, viewport, seed);
   // Vite removes this development-only dynamic import from production builds.
   let debug: import('./debug/DebugOverlay').DebugOverlay | undefined;
@@ -79,6 +83,7 @@ try {
     else loop.resume();
     pause.textContent = manualPause ? '▶ RESUME' : 'Ⅱ PAUSE';
     pause.setAttribute('aria-pressed', String(manualPause));
+    restart.disabled = game.state === GameState.Playing && !manualPause;
     draw(0);
   };
   const togglePause = (): void => {
@@ -93,6 +98,7 @@ try {
     () => {
       gesture();
       if (!manualPause) game.action();
+      restart.disabled = game.state === GameState.Playing && !manualPause;
     },
     togglePause,
     () => debug?.toggle(),
@@ -132,6 +138,52 @@ try {
     options,
   );
   document.addEventListener('visibilitychange', syncPause, options);
+  viewport.onResize = () => {
+    if (manualPause || document.hidden) draw(0);
+  };
+  const orientation = window.matchMedia('(orientation: portrait)');
+  orientation.addEventListener(
+    'change',
+    () => {
+      if (game.state === GameState.Playing) manualPause = true;
+      viewport.resize();
+      syncPause();
+    },
+    options,
+  );
+  fullscreen.hidden =
+    !document.fullscreenEnabled || typeof app.requestFullscreen !== 'function';
+  fullscreen.addEventListener(
+    'click',
+    async () => {
+      if (game.state === GameState.Playing) manualPause = true;
+      syncPause();
+      fullscreen.disabled = true;
+      try {
+        if (document.fullscreenElement) await document.exitFullscreen();
+        else await app.requestFullscreen();
+      } catch {
+        status.textContent =
+          'Fullscreen unavailable. You can continue playing in this window.';
+      } finally {
+        fullscreen.disabled = false;
+      }
+    },
+    options,
+  );
+  document.addEventListener(
+    'fullscreenchange',
+    () => {
+      const active = document.fullscreenElement === app;
+      fullscreen.textContent = active ? '⛶ EXIT FULLSCREEN' : '⛶ FULLSCREEN';
+      fullscreen.setAttribute('aria-pressed', String(active));
+      if (game.state === GameState.Playing) manualPause = true;
+      viewport.resize();
+      syncPause();
+      canvas.focus({ preventScroll: true });
+    },
+    options,
+  );
   window.addEventListener('pagehide', () => loop.pause(), options);
   window.addEventListener('pageshow', syncPause, options);
   window.addEventListener(
