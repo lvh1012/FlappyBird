@@ -54,6 +54,19 @@ npx wrangler pages deploy dist --project-name flappy-blueprint
 
 `wrangler.toml` dùng `pages_build_output_dir`, không phải Workers assets configuration. `public/_headers` được Vite chép sang `dist`: security headers và immutable cache cho assets có hash. Không cấu hình SPA rewrite vì chỉ có một trang và không có client-side routing.
 
+### Continuous deployment bằng GitHub Actions
+
+`.github/workflows/deploy.yml` chạy khi có commit vào `main` hoặc khi được gọi thủ công bằng `workflow_dispatch`. Workflow cài dependency từ lockfile, chạy formatting, lint, tests và production build trước khi deploy `dist` bằng Wrangler.
+
+Tạo Cloudflare Pages project tên `flappy-blueprint`, sau đó thêm hai repository secrets tại **Settings → Secrets and variables → Actions**:
+
+| Secret                  | Giá trị                                             |
+| ----------------------- | --------------------------------------------------- |
+| `CLOUDFLARE_ACCOUNT_ID` | Account ID trong Cloudflare dashboard               |
+| `CLOUDFLARE_API_TOKEN`  | API token có quyền ghi Cloudflare Pages cho account |
+
+Workflow dùng GitHub environment `production` và concurrency group cố định: deployment mới hơn sẽ hủy deployment production cũ còn đang chạy. Không lưu credentials trong source hoặc build output.
+
 ## GitHub
 
 Source được phát triển qua branch `feat/flappy-blueprint` và review bằng pull request trước khi merge vào `main`. Workflow `.github/workflows/ci.yml` chạy formatting, lint, tests, build và upload `dist` làm artifact. Không cần Cloudflare secret cho CI này; deploy được quản lý bằng Pages Git integration.

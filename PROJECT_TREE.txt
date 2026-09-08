@@ -1,5 +1,6 @@
 flappy-blueprint/
 .github/workflows/ci.yml
+.github/workflows/deploy.yml
 .gitignore
 .node-version
 .prettierignore
