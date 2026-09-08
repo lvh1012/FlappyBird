@@ -76,4 +76,4 @@ Source được phát triển qua branch `feat/flappy-blueprint` và review bằ
 
 Unit tests bao phủ integration physics, ceiling, long delta, NaN, collision edge/corner, difficulty bounds, PRNG reproducibility, seed validation, storage lỗi, state/restart, scoring exactly-once, pipe lifecycle và RAF pause/resume.
 
-TypeScript, ESLint, Prettier và Vite production build đã thành công. Vitest báo 35/35 tests pass ở 7 test files, nhưng test runner không thoát trong runtime hiện tại, kể cả với các pool khác nhau; chưa xác nhận được exit code 0 của npm test. Cần chạy lại npm test/CI trong Node.js chuẩn trước khi deploy. Chưa thực hiện browser/device QA hoặc deploy thực tế lên Cloudflare. Mục tiêu 60 FPS chưa được benchmark trên thiết bị thật.
+TypeScript, ESLint, Prettier, Vitest và Vite production build đã thành công. GitHub Actions xác nhận 35/35 tests pass ở 7 test files. Chưa thực hiện browser/device QA hoặc deploy thực tế lên Cloudflare. Mục tiêu 60 FPS chưa được benchmark trên thiết bị thật.

@@ -13,7 +13,7 @@ export class DebugOverlay {
     dpr: number,
   ): void {
     if (!this.enabled) return;
-    if (delta > 0) this.frameTime = this.frameTime * 0.9 + delta * 100;
+    if (delta > 0) this.frameTime = this.frameTime * 0.9 + delta * 1000;
     c.fillStyle = 'rgba(0,0,0,0.85)';
     c.fillRect(8, 112, 265, 100);
     const rows = [
