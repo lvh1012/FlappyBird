@@ -5,11 +5,18 @@ export function flap(bird: Bird): void {
   bird.velocityY = CONFIG.flapVelocity;
   bird.flapAge = 0;
 }
-export function integrate(bird: Bird, delta: number): void {
-  assertFinite(delta, bird.y, bird.velocityY, bird.rotation, bird.flapAge);
+export function integrate(bird: Bird, delta: number, verticalForce = 0): void {
+  assertFinite(
+    delta,
+    verticalForce,
+    bird.y,
+    bird.velocityY,
+    bird.rotation,
+    bird.flapAge,
+  );
   const dt = clamp(delta, 0, CONFIG.maxDelta);
   bird.velocityY = clamp(
-    bird.velocityY + CONFIG.gravity * dt,
+    bird.velocityY + (CONFIG.gravity + clamp(verticalForce, -450, 450)) * dt,
     CONFIG.flapVelocity,
     CONFIG.maxFallVelocity,
   );

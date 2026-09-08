@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { fitViewport } from '../src/viewport/fitViewport';
+import { fitViewport, fitWorldViewport } from '../src/viewport/fitViewport';
 
 describe('full-viewport backing buffer', () => {
   it.each([
@@ -26,5 +26,29 @@ describe('full-viewport backing buffer', () => {
     [-1, 500, 1],
   ])('rejects invalid dimensions', (width, height, dpr) => {
     expect(() => fitViewport(width, height, dpr)).toThrow(RangeError);
+  });
+});
+
+describe('responsive logical world', () => {
+  it('keeps the 432 logical width on portrait screens', () => {
+    expect(fitWorldViewport(390, 720)).toMatchObject({
+      left: 0,
+      width: 432,
+      right: 432,
+    });
+  });
+
+  it('expands the visible world on wide screens without stretching', () => {
+    const result = fitWorldViewport(1920, 900);
+    expect(result.scale).toBeCloseTo(900 / 768);
+    expect(result.width).toBeCloseTo(1638.4);
+    expect(result.left).toBeCloseTo(-603.2);
+    expect(result.right).toBeCloseTo(1035.2);
+    expect(120 - result.left).toBeCloseTo(result.width / 2 - 96);
+  });
+
+  it('rejects invalid logical viewport dimensions', () => {
+    expect(() => fitWorldViewport(0, 720)).toThrow(RangeError);
+    expect(() => fitWorldViewport(390, Infinity)).toThrow(RangeError);
   });
 });

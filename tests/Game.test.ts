@@ -4,6 +4,7 @@ import { GameState } from '../src/game/GameState';
 import { PipeManager } from '../src/entities/PipeManager';
 import { SeededRandom } from '../src/random/SeededRandom';
 import { getDifficulty } from '../src/game/Difficulty';
+import { STANDARD_CHALLENGE } from '../src/game/Challenge';
 it('starts with immediate flap, dies once, and restarts cleanly', () => {
   const events: string[] = [];
   const game = new Game(12, (event) => events.push(event));
@@ -40,14 +41,45 @@ it('scores each pair exactly once and keeps bounded unique pipes', () => {
   const ids = new Set<number>();
   for (let i = 0; i < 12000; i++) {
     pipes.update(1 / 120, getDifficulty(0));
-    const scored = pipes.collectScore(120);
+    const scored = pipes.collectClearances(120, 340).length;
     total += scored;
-    expect(pipes.collectScore(120)).toBe(0);
+    expect(pipes.collectClearances(120, 340)).toEqual([]);
     for (const pipe of pipes.pipes) ids.add(pipe.id);
     expect(pipes.pipes.length).toBeLessThanOrEqual(4);
   }
   expect(total).toBeGreaterThan(50);
   expect(ids.size).toBeGreaterThan(total);
+});
+it('fills an expanded viewport with upcoming pipes', () => {
+  const pipes = new PipeManager(new SeededRandom(7)),
+    right = 1458;
+  pipes.setViewportBounds(-180, right);
+  for (let i = 0; i < 8; i++) pipes.update(0, getDifficulty(0));
+  expect(pipes.pipes.length).toBeGreaterThan(1);
+  expect(pipes.pipes.at(-1)?.x).toBeGreaterThan(
+    right - getDifficulty(0).spacing,
+  );
+});
+it('keeps the seeded challenge schedule independent of viewport width', () => {
+  const sequence = (left: number, right: number) => {
+    const pipes = new PipeManager(new SeededRandom(19)),
+      challenges = new Map<number, string>();
+    pipes.setViewportBounds(left, right);
+    for (let tick = 0; tick < 5000 && challenges.size < 36; tick++) {
+      pipes.update(1 / 30, getDifficulty(0));
+      for (const pipe of pipes.pipes)
+        challenges.set(pipe.id, pipe.challenge.kind);
+    }
+    return [...challenges.entries()]
+      .sort(([a], [b]) => a - b)
+      .slice(0, 36)
+      .map(([, kind]) => kind);
+  };
+  const narrow = sequence(0, 432),
+    wide = sequence(-603.2, 1035.2);
+  expect(narrow).toHaveLength(36);
+  expect(wide).toEqual(narrow);
+  expect(new Set(narrow.slice(8))).not.toEqual(new Set(['standard']));
 });
 it('collision wins over scoring on the same tick', () => {
   const game = new Game(1);
@@ -56,11 +88,65 @@ it('collision wins over scoring on the same tick', () => {
     id: 0,
     x: 40,
     gapY: 340,
+    baseGapY: 340,
     gapSize: 172,
+    challenge: STANDARD_CHALLENGE,
+    phase: 0,
+    age: 0,
     scored: false,
   });
   game.bird.y = 703;
   game.update(1 / 120);
   expect(game.state).toBe(GameState.GameOver);
   expect(game.score).toBe(0);
+});
+it('rewards precise clearance without accelerating difficulty progress', () => {
+  const game = new Game(2);
+  game.action();
+  game.bird.y = 340;
+  game.bird.velocityY = 0;
+  game.pipes.pipes.push({
+    id: 0,
+    x: 40,
+    gapY: 340,
+    baseGapY: 340,
+    gapSize: 172,
+    challenge: STANDARD_CHALLENGE,
+    phase: 0,
+    age: 0,
+    scored: false,
+  });
+  game.update(1 / 120);
+  expect(game.clearances).toBe(1);
+  expect(game.combo).toBe(1);
+  expect(game.score).toBe(2);
+  expect(game.lastScoreDelta).toBe(2);
+});
+it('awards the advertised two-point bonus for a perfect risk clearance', () => {
+  const game = new Game(3);
+  game.action();
+  game.bird.y = 310;
+  game.bird.velocityY = 0;
+  game.pipes.pipes.push({
+    id: 0,
+    x: 40,
+    gapY: 340,
+    baseGapY: 340,
+    gapSize: 172,
+    challenge: {
+      ...STANDARD_CHALLENGE,
+      kind: 'risk',
+      label: 'PRECISION ROUTE // HIGH',
+      targetOffset: -30,
+      perfectHalfHeight: 18,
+    },
+    phase: 0,
+    age: 0,
+    scored: false,
+  });
+  game.update(1 / 120);
+  expect(game.clearances).toBe(1);
+  expect(game.combo).toBe(1);
+  expect(game.lastScoreDelta).toBe(4);
+  expect(game.score).toBe(4);
 });

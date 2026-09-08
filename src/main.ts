@@ -53,7 +53,7 @@ try {
       storage.saveBest(game.score);
     if (event === 'collision') {
       restart.disabled = false;
-      status.textContent = `Test failed. Score ${game.score}. Best ${storage.getBest()}. Press Space to retry.`;
+      status.textContent = `Test failed: ${game.failureCause}. Score ${game.score}. Best ${storage.getBest()}. Press Space to retry.`;
       restart.textContent = '↗ RETRY TEST';
     }
     if (event === 'restart') {
@@ -63,7 +63,7 @@ try {
     if (event === 'flap') restart.textContent = '↗ RESTART';
   });
   const viewport = new CanvasViewport(canvas, c, stage),
-    renderer = new BlueprintRenderer(c, viewport, seed);
+    renderer = new BlueprintRenderer(c, viewport);
   // Vite removes this development-only dynamic import from production builds.
   let debug: import('./debug/DebugOverlay').DebugOverlay | undefined;
   if (import.meta.env.DEV)
@@ -72,9 +72,10 @@ try {
     });
   const draw = (dt: number): void => {
     renderer.draw(game, effects, storage.getBest(), manualPause);
-    debug?.draw(c, game, dt, viewport.dpr);
+    debug?.draw(c, game, dt, viewport.dpr, viewport.left, viewport.width);
   };
   const loop = new GameLoop((dt) => {
+    game.pipes.setViewportBounds(viewport.left, viewport.right);
     game.update(dt);
     effects.update(dt);
   }, draw);

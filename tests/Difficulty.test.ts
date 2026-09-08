@@ -8,6 +8,8 @@ it('scales monotonically and stays within playable limits', () => {
     expect(d.speed).toBeLessThanOrEqual(208);
     expect(d.gap).toBeLessThanOrEqual(previous.gap);
     expect(d.gap).toBeGreaterThanOrEqual(142);
+    expect(d.maxGapDelta).toBeGreaterThanOrEqual(previous.maxGapDelta);
+    expect(d.maxGapDelta).toBeLessThanOrEqual(122);
     previous = d;
   }
 });

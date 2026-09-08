@@ -1,6 +1,6 @@
 import { CONFIG } from '../game/GameConfig';
 import { finiteOr } from '../utils/math';
-import { fitViewport } from './fitViewport';
+import { fitViewport, fitWorldViewport } from './fitViewport';
 export class CanvasViewport {
   private observer: ResizeObserver | undefined;
   private scale = 1;
@@ -9,6 +9,10 @@ export class CanvasViewport {
   private rawDpr = 0;
   onResize: (() => void) | undefined;
   dpr = 1;
+  left: number = 0;
+  width: number = CONFIG.width;
+  right: number = CONFIG.width;
+  centerX: number = CONFIG.width / 2;
   constructor(
     private readonly canvas: HTMLCanvasElement,
     private readonly context: CanvasRenderingContext2D,
@@ -42,12 +46,13 @@ export class CanvasViewport {
       this.canvas.height = size.height;
     }
     this.dpr = Math.min(size.width / rect.width, size.height / rect.height);
-    this.scale =
-      Math.min(area.width / CONFIG.width, area.height / CONFIG.height) *
-      this.dpr;
-    this.offsetX =
-      (area.left - rect.left) * this.dpr +
-      (area.width * this.dpr - CONFIG.width * this.scale) / 2;
+    const world = fitWorldViewport(area.width, area.height);
+    this.left = world.left;
+    this.width = world.width;
+    this.right = world.right;
+    this.centerX = world.left + world.width / 2;
+    this.scale = world.scale * this.dpr;
+    this.offsetX = (area.left - rect.left) * this.dpr - this.left * this.scale;
     this.offsetY =
       (area.top - rect.top) * this.dpr +
       (area.height * this.dpr - CONFIG.height * this.scale) / 2;

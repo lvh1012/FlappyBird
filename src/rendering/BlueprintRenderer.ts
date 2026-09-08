@@ -2,50 +2,54 @@ import type { Game } from '../game/Game';
 import { GameState } from '../game/GameState';
 import { CONFIG } from '../game/GameConfig';
 import type { Effects } from '../effects/Effects';
+import type { PipePair } from '../entities/PipeManager';
 import type { CanvasViewport } from '../viewport/CanvasViewport';
-import { BackgroundRenderer } from './BackgroundRenderer';
 import {
   CYAN,
-  FAINT,
   INK,
   PAPER,
-  crosshair,
-  dimension,
   ellipse,
   label,
   sketchLine,
   sketchRect,
 } from './BlueprintPrimitives';
 import { drawUi } from './UiRenderer';
+
+interface WindStreamContext {
+  readonly pipeId: number;
+  readonly time: number;
+  readonly reducedMotion: boolean;
+  readonly up: boolean;
+  readonly flowTop: number;
+  readonly flowBottom: number;
+  readonly speed: number;
+}
+
 export class BlueprintRenderer {
-  private readonly background: BackgroundRenderer;
   constructor(
     private readonly c: CanvasRenderingContext2D,
     private readonly viewport: CanvasViewport,
-    seed: number,
-  ) {
-    this.background = new BackgroundRenderer(seed);
-  }
+  ) {}
   draw(game: Game, effects: Effects, best: number, paused: boolean): void {
-    const c = this.c;
+    const c = this.c,
+      left = this.viewport.left,
+      right = this.viewport.right,
+      width = this.viewport.width;
     this.viewport.begin();
     c.save();
     c.beginPath();
-    c.rect(0, 0, CONFIG.width, CONFIG.height);
+    c.rect(left, 0, width, CONFIG.height);
     c.clip();
-    this.background.draw(c);
     c.save();
     c.translate(effects.shake.offset, 0);
     c.lineWidth = 0.9;
     for (const pipe of game.pipes.pipes) {
+      this.challengeField(pipe, game.time, effects.reducedMotion);
       const top = pipe.gapY - pipe.gapSize / 2,
         bottom = pipe.gapY + pipe.gapSize / 2;
       this.duct(pipe.x, 0, top, pipe.id, true);
       this.duct(pipe.x, bottom, CONFIG.ground - bottom, pipe.id, false);
-      if (pipe.id % 3 === 0) {
-        dimension(c, pipe.x + 88, top + 8, bottom - 8);
-        label(c, `GAP ${pipe.gapSize}`, pipe.x + 95, pipe.gapY, 9);
-      }
+      this.challengeMarker(pipe);
     }
     const bird = game.bird,
       idle = game.state === GameState.Ready;
@@ -79,22 +83,12 @@ export class BlueprintRenderer {
     c.beginPath();
     c.arc(11, -6, 2.4, 0, Math.PI * 2);
     c.fill();
-    c.strokeStyle = CYAN;
-    crosshair(c, 0, 0, 3);
     if (pulse > 0) {
       sketchLine(c, -37, 12, -48, 16, 9);
       sketchLine(c, -34, 18, -42, 23, 10);
     }
     c.restore();
-    if (idle) {
-      c.strokeStyle = FAINT;
-      sketchLine(c, 162, 365, 126, 403);
-      sketchLine(c, 126, 403, 66, 403);
-      label(c, 'FLAP UNIT Mk.II', 58, 420, 11);
-      dimension(c, 289, 309, 374);
-      label(c, 'R = 24', 301, 344, 10);
-      label(c, 'CG', 218, 387, 10);
-    } else if (bird.flapAge < 0.28)
+    if (!idle && bird.flapAge < 0.28)
       label(c, 'LIFT ↑', bird.x + 34, bird.y - 25, 10);
     for (const p of effects.particles.particles) {
       c.globalAlpha = 1 - p.age / p.lifetime;
@@ -109,11 +103,128 @@ export class BlueprintRenderer {
     }
     c.globalAlpha = 1;
     if (effects.scoreAge < 0.6)
-      label(c, '+1', bird.x + 38, bird.y - 35 - effects.scoreAge * 35, 22, INK);
-    this.ground(game.groundOffset);
+      label(
+        c,
+        `+${game.lastScoreDelta}`,
+        bird.x + 38,
+        bird.y - 35 - effects.scoreAge * 35,
+        22,
+        INK,
+      );
+    this.ground(game.groundOffset, left, right);
     c.restore();
-    drawUi(c, game, best, paused, effects.scoreAge);
+    drawUi(c, game, best, paused, effects.scoreAge, left, width);
     c.restore();
+  }
+  private challengeField(
+    pipe: PipePair,
+    time: number,
+    reducedMotion: boolean,
+  ): void {
+    const c = this.c,
+      challenge = pipe.challenge;
+    if (challenge.windForce === 0) return;
+    const left = pipe.x - 145,
+      width = CONFIG.pipeWidth + 145,
+      up = challenge.windForce < 0,
+      flowTop = 158,
+      flowBottom = CONFIG.ground - 42,
+      speed = 0.2 + Math.abs(challenge.windForce) / 1800;
+    c.save();
+    c.fillStyle = 'rgba(64,95,141,0.045)';
+    c.fillRect(left, 96, width, CONFIG.ground - 112);
+    c.strokeStyle = CYAN;
+    c.setLineDash([7, 7]);
+    c.strokeRect(left, 96, width, CONFIG.ground - 112);
+    c.setLineDash([]);
+    const streamContext: WindStreamContext = {
+      pipeId: pipe.id,
+      time,
+      reducedMotion,
+      up,
+      flowTop,
+      flowBottom,
+      speed,
+    };
+    for (let lane = 0; lane < 5; lane++) {
+      const baseX = left + 22 + lane * ((width - 44) / 4);
+      for (let stream = 0; stream < 2; stream++)
+        this.drawWindStream(baseX, lane, stream, streamContext);
+    }
+    c.globalAlpha = 1;
+    label(c, challenge.label, left + width / 2, 121, 10, CYAN, 'center');
+    c.restore();
+  }
+  private drawWindStream(
+    baseX: number,
+    lane: number,
+    stream: number,
+    context: WindStreamContext,
+  ): void {
+    const { pipeId, time, reducedMotion, up, flowTop, flowBottom, speed } =
+        context,
+      travel = flowBottom - flowTop,
+      phase = lane * 0.173 + stream * 0.47,
+      progress = reducedMotion ? phase % 1 : (time * speed + phase) % 1,
+      y = up ? flowBottom - progress * travel : flowTop + progress * travel,
+      sway = reducedMotion
+        ? 0
+        : Math.sin(time * 3.2 + lane * 1.7 + stream * 2.1) * 5,
+      tipX = baseX + sway,
+      tipY = y + (up ? -32 : 32),
+      headY = tipY + (up ? 8 : -8),
+      seed = pipeId * 41 + lane * 7 + stream * 3;
+    this.c.globalAlpha = 0.28 + Math.sin(progress * Math.PI) * 0.62;
+    sketchLine(this.c, baseX - sway * 0.35, y, tipX, tipY, seed);
+    sketchLine(this.c, tipX, tipY, tipX - 5, headY, seed + 1);
+    sketchLine(this.c, tipX, tipY, tipX + 5, headY, seed + 2);
+  }
+  private challengeMarker(pipe: PipePair): void {
+    const c = this.c,
+      challenge = pipe.challenge;
+    if (challenge.kind === 'risk') {
+      const targetY = pipe.gapY + challenge.targetOffset;
+      c.save();
+      c.strokeStyle = INK;
+      c.setLineDash([5, 4]);
+      c.strokeRect(
+        pipe.x + 7,
+        targetY - challenge.perfectHalfHeight,
+        CONFIG.pipeWidth - 14,
+        challenge.perfectHalfHeight * 2,
+      );
+      c.setLineDash([]);
+      ellipse(c, pipe.x + CONFIG.pipeWidth / 2, targetY, 5, 5);
+      label(
+        c,
+        'BONUS +2',
+        pipe.x + CONFIG.pipeWidth / 2,
+        targetY - 24,
+        9,
+        INK,
+        'center',
+      );
+      c.restore();
+    }
+    if (challenge.kind === 'valve') {
+      const top = pipe.gapY - pipe.gapSize / 2;
+      c.save();
+      c.strokeStyle = CYAN;
+      const valveX = pipe.x + CONFIG.pipeWidth / 2;
+      ellipse(c, valveX, top - 28, 13, 13);
+      sketchLine(c, valveX - 9, top - 28, valveX + 9, top - 28, pipe.id + 72);
+      sketchLine(c, valveX, top - 37, valveX, top - 19, pipe.id + 73);
+      label(
+        c,
+        'VALVE',
+        pipe.x + CONFIG.pipeWidth / 2,
+        top - 47,
+        9,
+        CYAN,
+        'center',
+      );
+      c.restore();
+    }
   }
   private duct(
     x: number,
@@ -140,33 +251,18 @@ export class BlueprintRenderer {
       c.arc(boltX, joint + 7, 2, 0, Math.PI * 2);
       c.stroke();
     }
-    c.strokeStyle = FAINT;
-    c.setLineDash([6, 6]);
-    c.beginPath();
-    c.moveTo(x + w / 2, y + 24);
-    c.lineTo(x + w / 2, y + height - 24);
-    c.stroke();
-    c.setLineDash([]);
-    if (height > 100) {
-      c.save();
-      c.translate(x + 25, upper ? y + height - 45 : y + 48);
-      c.rotate(-Math.PI / 2);
-      label(c, `DUCT B-${String(id).padStart(2, '0')}`, 0, 0, 9);
-      c.restore();
-    }
   }
-  private ground(offset: number): void {
+  private ground(offset: number, left: number, right: number): void {
     const c = this.c;
     c.fillStyle = PAPER;
-    c.fillRect(0, CONFIG.ground, 432, 64);
+    c.fillRect(left, CONFIG.ground, right - left, 64);
     c.strokeStyle = CYAN;
     c.lineWidth = 0.6;
-    for (let x = -48 - offset; x < 480; x += 16)
+    const firstHatch = Math.floor((left - offset) / 16) * 16;
+    for (let x = firstHatch; x < right + 32; x += 16)
       sketchLine(c, x, CONFIG.ground + 24, x + 22, CONFIG.ground + 2, 3);
     c.strokeStyle = INK;
-    sketchLine(c, 0, CONFIG.ground, 432, CONFIG.ground, 3);
-    sketchLine(c, 0, CONFIG.ground + 27, 432, CONFIG.ground + 27, 4);
-    label(c, 'GROUND DATUM ±0.00', 18, 752, 10);
-    label(c, 'SHEET 01 / 01', 414, 752, 9, CYAN, 'right');
+    sketchLine(c, left, CONFIG.ground, right, CONFIG.ground, 3);
+    sketchLine(c, left, CONFIG.ground + 27, right, CONFIG.ground + 27, 4);
   }
 }
