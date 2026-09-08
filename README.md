@@ -19,6 +19,7 @@ npm run preview
 
 ## Điều khiển
 
+- Visual theme: giấy ngà dịu `#ECE6D2`, nét bút bi xanh `#1E4F9A`, grid xanh nhạt chạy liên tục toàn viewport; lớp grain được tạo một lần nên không nhấp nháy.
 - Canvas phủ viewport, nét bút bi xanh trên giấy ngà. World vẫn giữ 9:16 và được clip để không lộ thêm pipe trên màn hình rộng.
 - Mobile portrait thu gọn chrome; landscape thấp chuyển controls sang bên phải. Nút Fullscreen chỉ hiện khi browser hỗ trợ, giữ controls trong fullscreen container.
 - Xoay màn hình hoặc chuyển Fullscreen khi đang chơi sẽ pause; chủ động Resume để tiếp tục. Restart trong lúc chơi chỉ khả dụng sau khi pause để tránh bấm nhầm.

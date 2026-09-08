@@ -56,7 +56,7 @@ export function drawUi(
     label(c, 'CALCULATIONS PROBABLY CORRECT', 216, 645, 9, CYAN, 'center');
   }
   if (game.state === GameState.GameOver) {
-    c.fillStyle = 'rgba(245,240,218,0.97)';
+    c.fillStyle = 'rgba(236,230,210,0.97)';
     c.fillRect(44, 215, 344, 340);
     c.strokeStyle = INK;
     sketchRect(c, 44, 215, 344, 340, 11);
@@ -88,7 +88,7 @@ export function drawUi(
     label(c, '↗ RETRY TEST', 216, 499, 17, INK, 'center');
   }
   if (paused) {
-    c.fillStyle = 'rgba(245,240,218,0.94)';
+    c.fillStyle = 'rgba(236,230,210,0.94)';
     c.fillRect(0, 0, 432, 768);
     label(c, 'TEST SUSPENDED', 216, 365, 24, INK, 'center');
     label(c, 'PRESS P OR RESUME', 216, 398, 13, CYAN, 'center');
