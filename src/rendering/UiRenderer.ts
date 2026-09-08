@@ -36,6 +36,12 @@ export function drawUi(
     CYAN,
     'right',
   );
+  if (game.state === GameState.Playing) {
+    if (game.combo > 0) label(c, `COMBO // ${game.combo}`, 27, 111, 11, INK);
+    const upcoming = game.pipes.upcomingChallenge(game.bird.x);
+    if (upcoming)
+      label(c, upcoming.challenge.label, 216, 132, 11, INK, 'center');
+  }
   if (game.state === GameState.Ready) {
     label(c, 'FLIGHT TEST', 216, 204, 13, CYAN, 'center');
     label(c, 'LET IT FLY.', 216, 244, 35, INK, 'center');
@@ -69,20 +75,21 @@ export function drawUi(
     for (const [i, name, value] of [
       [0, 'SCORE', game.score],
       [1, 'BEST', best],
-      [2, 'CLEARANCES', game.score],
+      [2, 'CLEARANCES', game.clearances],
+      [3, 'BEST COMBO', game.bestCombo],
     ] as const) {
-      label(c, name, 70, 315 + i * 35, 14, INK);
+      label(c, name, 70, 307 + i * 30, 13, INK);
       label(
         c,
         String(value).padStart(3, '0'),
         360,
-        315 + i * 35,
-        17,
+        307 + i * 30,
+        16,
         INK,
         'right',
       );
     }
-    label(c, 'STRUCTURAL FAILURE DETECTED', 216, 434, 11, RED, 'center');
+    label(c, `FAILURE // ${game.failureCause}`, 216, 434, 11, RED, 'center');
     c.strokeStyle = CYAN;
     sketchRect(c, 102, 468, 228, 50, 34);
     label(c, '↗ RETRY TEST', 216, 499, 17, INK, 'center');

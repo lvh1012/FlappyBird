@@ -32,6 +32,16 @@ npm run preview
 - `?seed=12345`: tái lập pipe sequence; retry giữ nguyên seed. Seed là uint32, bao gồm 0.
 - Development: `?debug=1` hoặc D khi canvas có focus hiển thị FPS, frame time, state, tọa độ, velocity, số pipe, score, seed và DPR. Debug module bị loại khỏi production build.
 
+## Challenge system
+
+- 8 clearance đầu là onboarding, chỉ có static pipe.
+- Sau onboarding, `EventDirector` chọn deterministic challenge theo score-independent clearance progression: updraft, downdraft, precision route và oscillating valve.
+- Wind zone có vùng dashed, directional arrow và label trước khi lực tác động. Vertical force được cap để không phá physics bounds.
+- Precision route là mục tiêu tùy chọn trong gap: clearance thường vẫn an toàn; bay qua target nhận perfect bonus và tăng combo.
+- Moving valve chỉ xuất hiện từ clearance 24 và luôn được theo sau bởi một recovery pipe.
+- Difficulty vật lý dựa trên clearance, không dựa trên bonus score. Vì vậy combo không làm game tăng tốc ngoài dự kiến.
+- Game-over report ghi nguyên nhân va chạm, clearance và best combo của run.
+
 ## Cloudflare Pages
 
 Dự án là static site. Không cần Worker, database, API key hoặc environment variable trong client.
@@ -82,9 +92,9 @@ Source được phát triển qua branch `feat/flappy-blueprint` và review bằ
 - `GameLoop` sở hữu duy nhất một RAF. Fixed step 1/120 giây, frame delta và accumulator cap 50 ms, tối đa 6 update mỗi frame. Lag dài làm simulation chậm lại thay vì cố catch-up. Resume xóa timestamp/accumulator.
 - World cố định 432×768; viewport tách CSS pixels, device pixels và logical coordinates. Resize không reset gameplay và redraw khi pause. DPR tối đa 4, backing buffer tối đa 4 triệu pixels (~16 MB RGBA); `setTransform` tránh scale cộng dồn. CSS dùng dynamic viewport units và safe-area insets.
 - Bird dùng semi-implicit Euler, gravity 1500, flap -430, fall speed cap 850. Ceiling clamp y/velocity; ground và pipes gây game over. Collision circle radius 13 nhỏ hơn thân vẽ 23×18 để tạo độ dung sai.
-- Difficulty thuần theo bậc mỗi 10 score, speed 160–208 và gap 172–142. Gap center giới hạn thay đổi 115 px giữa hai pipe; gap của pipe đã spawn không thay đổi.
+- Difficulty thuần theo bậc mỗi 10 clearance, speed 160–208 và gap 172–142. Gap center delta tăng từ 80 đến tối đa 122 px; moving valve dao động 12–18 px trong giới hạn world an toàn.
 - Seeded PRNG tách simulation, background và effects. Doodle offsets theo seed ổn định, background cache một lần. Cùng seed + input theo simulation tick + config tái lập simulation; không hứa cùng wall-clock input trên mọi frame rate.
-- `PipeManager` quản lý spawn/move/remove và scoring exactly-once. ID tăng trong mỗi run; mỗi run reset toàn bộ pipe collection.
+- `PipeManager` quản lý spawn/move/remove, wind zone, valve phase và clearance exactly-once. `EventDirector` áp dụng unlock threshold, challenge budget, no-repeat selection và recovery pipe.
 - Renderer chỉ đọc simulation. Particles tối đa 128; shake dùng renderer transform, không sửa collision position. Reduced motion giảm particles, tắt shake/idle bob.
 - AudioContext khởi tạo sau user gesture, âm lượng nhỏ; lỗi audio disable audio, không chặn game. Storage validation bỏ dữ liệu hỏng; lỗi privacy/quota chuyển sang memory.
 - Input dùng pointerdown duy nhất để tránh synthetic click double-trigger. Keyboard chỉ bắt trên canvas có focus. AbortController và HMR dispose dọn listener/RAF; pagehide/pageshow hỗ trợ bfcache.
@@ -92,6 +102,6 @@ Source được phát triển qua branch `feat/flappy-blueprint` và review bằ
 
 ## Kiểm chứng
 
-Unit tests bao phủ integration physics, ceiling, long delta, NaN, collision edge/corner, difficulty bounds, PRNG reproducibility, seed validation, storage lỗi, state/restart, scoring exactly-once, pipe lifecycle và RAF pause/resume.
+Unit tests bao phủ integration physics và wind force, collision, difficulty bounds, PRNG reproducibility, event determinism, onboarding, valve recovery, precision target, state/restart, combo scoring, pipe lifecycle, storage và RAF pause/resume.
 
-TypeScript, ESLint, Prettier, Vitest và Vite production build đã thành công. GitHub Actions xác nhận 35/35 tests pass ở 7 test files. Chưa thực hiện browser/device QA hoặc deploy thực tế lên Cloudflare. Mục tiêu 60 FPS chưa được benchmark trên thiết bị thật.
+TypeScript, ESLint, Prettier và Vite production build đã thành công. GitHub Actions chạy toàn bộ Vitest suite trước khi merge. Chưa thực hiện browser/device QA trên thiết bị thật. Mục tiêu 60 FPS chưa được benchmark trên thiết bị thật.

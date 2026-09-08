@@ -36,4 +36,13 @@ describe('physics', () => {
     expect(b.y).toBe(b.radius);
     expect(b.velocityY).toBe(0);
   });
+  it('applies bounded vertical wind force', () => {
+    const updraft = new Bird(),
+      downdraft = new Bird();
+    integrate(updraft, 0.01, -300);
+    integrate(downdraft, 0.01, 300);
+    expect(updraft.velocityY).toBe(12);
+    expect(downdraft.velocityY).toBe(18);
+    expect(() => integrate(updraft, 0.01, Infinity)).toThrow();
+  });
 });

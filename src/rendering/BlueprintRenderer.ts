@@ -2,6 +2,7 @@ import type { Game } from '../game/Game';
 import { GameState } from '../game/GameState';
 import { CONFIG } from '../game/GameConfig';
 import type { Effects } from '../effects/Effects';
+import type { PipePair } from '../entities/PipeManager';
 import type { CanvasViewport } from '../viewport/CanvasViewport';
 import { BackgroundRenderer } from './BackgroundRenderer';
 import {
@@ -38,10 +39,12 @@ export class BlueprintRenderer {
     c.translate(effects.shake.offset, 0);
     c.lineWidth = 0.9;
     for (const pipe of game.pipes.pipes) {
+      this.challengeField(pipe);
       const top = pipe.gapY - pipe.gapSize / 2,
         bottom = pipe.gapY + pipe.gapSize / 2;
       this.duct(pipe.x, 0, top, pipe.id, true);
       this.duct(pipe.x, bottom, CONFIG.ground - bottom, pipe.id, false);
+      this.challengeMarker(pipe);
       if (pipe.id % 3 === 0) {
         dimension(c, pipe.x + 88, top + 8, bottom - 8);
         label(c, `GAP ${pipe.gapSize}`, pipe.x + 95, pipe.gapY, 9);
@@ -109,11 +112,97 @@ export class BlueprintRenderer {
     }
     c.globalAlpha = 1;
     if (effects.scoreAge < 0.6)
-      label(c, '+1', bird.x + 38, bird.y - 35 - effects.scoreAge * 35, 22, INK);
+      label(
+        c,
+        `+${game.lastScoreDelta}`,
+        bird.x + 38,
+        bird.y - 35 - effects.scoreAge * 35,
+        22,
+        INK,
+      );
     this.ground(game.groundOffset);
     c.restore();
     drawUi(c, game, best, paused, effects.scoreAge);
     c.restore();
+  }
+  private challengeField(pipe: PipePair): void {
+    const c = this.c,
+      challenge = pipe.challenge;
+    if (challenge.windForce === 0) return;
+    const left = pipe.x - 145,
+      width = CONFIG.pipeWidth + 145,
+      up = challenge.windForce < 0;
+    c.save();
+    c.fillStyle = 'rgba(64,95,141,0.045)';
+    c.fillRect(left, 96, width, CONFIG.ground - 112);
+    c.strokeStyle = CYAN;
+    c.setLineDash([7, 7]);
+    c.strokeRect(left, 96, width, CONFIG.ground - 112);
+    c.setLineDash([]);
+    for (let x = left + 24; x < left + width; x += 44) {
+      const from = up ? 570 : 170,
+        to = up ? 500 : 240;
+      sketchLine(c, x, from, x, to, pipe.id + Math.round(x));
+      sketchLine(c, x, to, x - 5, to + (up ? 8 : -8), pipe.id + 31);
+      sketchLine(c, x, to, x + 5, to + (up ? 8 : -8), pipe.id + 32);
+    }
+    label(c, challenge.label, left + width / 2, 121, 10, CYAN, 'center');
+    c.restore();
+  }
+  private challengeMarker(pipe: PipePair): void {
+    const c = this.c,
+      challenge = pipe.challenge;
+    if (challenge.kind === 'risk') {
+      const targetY = pipe.gapY + challenge.targetOffset;
+      c.save();
+      c.strokeStyle = INK;
+      c.setLineDash([5, 4]);
+      c.strokeRect(
+        pipe.x + 7,
+        targetY - challenge.perfectHalfHeight,
+        CONFIG.pipeWidth - 14,
+        challenge.perfectHalfHeight * 2,
+      );
+      c.setLineDash([]);
+      crosshair(c, pipe.x + CONFIG.pipeWidth / 2, targetY, 5);
+      label(
+        c,
+        'BONUS +2',
+        pipe.x + CONFIG.pipeWidth / 2,
+        targetY - 24,
+        9,
+        INK,
+        'center',
+      );
+      c.restore();
+    }
+    if (challenge.kind === 'valve') {
+      const top = pipe.gapY - pipe.gapSize / 2;
+      c.save();
+      c.strokeStyle = CYAN;
+      c.setLineDash([4, 5]);
+      sketchLine(
+        c,
+        pipe.x - 18,
+        pipe.baseGapY,
+        pipe.x + 90,
+        pipe.baseGapY,
+        pipe.id + 72,
+      );
+      c.setLineDash([]);
+      ellipse(c, pipe.x + CONFIG.pipeWidth / 2, top - 28, 13, 13);
+      crosshair(c, pipe.x + CONFIG.pipeWidth / 2, top - 28, 9);
+      label(
+        c,
+        'VALVE',
+        pipe.x + CONFIG.pipeWidth / 2,
+        top - 47,
+        9,
+        CYAN,
+        'center',
+      );
+      c.restore();
+    }
   }
   private duct(
     x: number,

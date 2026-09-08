@@ -19,6 +19,8 @@ src/effects/ScreenShake.ts
 src/entities/Bird.ts
 src/entities/PipeManager.ts
 src/game/Difficulty.ts
+src/game/Challenge.ts
+src/game/EventDirector.ts
 src/game/Game.ts
 src/game/GameConfig.ts
 src/game/GameLoop.ts
@@ -40,9 +42,11 @@ src/viewport/fitViewport.ts
 tests/Collision.test.ts
 tests/ColorContrast.test.ts
 tests/Difficulty.test.ts
+tests/EventDirector.test.ts
 tests/Game.test.ts
 tests/GameLoop.test.ts
 tests/Physics.test.ts
+tests/PipeChallenges.test.ts
 tests/ScoreStorage.test.ts
 tests/SeededRandom.test.ts
 tests/Viewport.test.ts

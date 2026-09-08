@@ -4,6 +4,7 @@ import { GameState } from '../src/game/GameState';
 import { PipeManager } from '../src/entities/PipeManager';
 import { SeededRandom } from '../src/random/SeededRandom';
 import { getDifficulty } from '../src/game/Difficulty';
+import { STANDARD_CHALLENGE } from '../src/game/Challenge';
 it('starts with immediate flap, dies once, and restarts cleanly', () => {
   const events: string[] = [];
   const game = new Game(12, (event) => events.push(event));
@@ -56,11 +57,37 @@ it('collision wins over scoring on the same tick', () => {
     id: 0,
     x: 40,
     gapY: 340,
+    baseGapY: 340,
     gapSize: 172,
+    challenge: STANDARD_CHALLENGE,
+    phase: 0,
+    age: 0,
     scored: false,
   });
   game.bird.y = 703;
   game.update(1 / 120);
   expect(game.state).toBe(GameState.GameOver);
   expect(game.score).toBe(0);
+});
+it('rewards precise clearance without accelerating difficulty progress', () => {
+  const game = new Game(2);
+  game.action();
+  game.bird.y = 340;
+  game.bird.velocityY = 0;
+  game.pipes.pipes.push({
+    id: 0,
+    x: 40,
+    gapY: 340,
+    baseGapY: 340,
+    gapSize: 172,
+    challenge: STANDARD_CHALLENGE,
+    phase: 0,
+    age: 0,
+    scored: false,
+  });
+  game.update(1 / 120);
+  expect(game.clearances).toBe(1);
+  expect(game.combo).toBe(1);
+  expect(game.score).toBe(2);
+  expect(game.lastScoreDelta).toBe(2);
 });

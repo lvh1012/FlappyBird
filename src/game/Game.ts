@@ -13,6 +13,12 @@ export class Game {
   bird = new Bird();
   pipes: PipeManager;
   score = 0;
+  clearances = 0;
+  combo = 0;
+  bestCombo = 0;
+  lastScoreDelta = 1;
+  windForce = 0;
+  failureCause = 'STRUCTURAL FAILURE';
   time = 0;
   groundOffset = 0;
   overAge = 0;
@@ -23,7 +29,10 @@ export class Game {
     readonly seed: number,
     private readonly emit: (event: GameEvent) => void = () => {},
   ) {
-    this.pipes = new PipeManager(new SeededRandom(seed));
+    this.pipes = this.createPipeManager();
+  }
+  private createPipeManager(): PipeManager {
+    return new PipeManager(new SeededRandom(this.seed));
   }
   private transition(next: GameState): void {
     const valid =
@@ -47,8 +56,14 @@ export class Game {
     if (this.state === GameState.Playing) this.transition(GameState.GameOver);
     if (this.state === GameState.GameOver) this.transition(GameState.Ready);
     this.bird = new Bird();
-    this.pipes = new PipeManager(new SeededRandom(this.seed));
+    this.pipes = this.createPipeManager();
     this.score = 0;
+    this.clearances = 0;
+    this.combo = 0;
+    this.bestCombo = 0;
+    this.lastScoreDelta = 1;
+    this.windForce = 0;
+    this.failureCause = 'STRUCTURAL FAILURE';
     this.time = 0;
     this.groundOffset = 0;
     this.overAge = 0;
@@ -66,38 +81,58 @@ export class Game {
       this.bird.y = Math.min(this.bird.y, CONFIG.ground - this.bird.radius);
       return;
     }
-    integrate(this.bird, dt);
-    const difficulty = getDifficulty(this.score);
-    this.pipes.update(dt, difficulty);
+    const difficulty = getDifficulty(this.clearances);
+    this.pipes.update(dt, difficulty, this.clearances);
+    this.windForce = this.pipes.windForceAt(this.bird.x);
+    integrate(this.bird, dt, this.windForce);
     this.groundOffset = (this.groundOffset + difficulty.speed * dt) % 48;
-    const hit =
-      this.bird.y + this.bird.radius >= CONFIG.ground ||
-      this.pipes.pipes.some((pipe) => {
-        const top = pipe.gapY - pipe.gapSize / 2,
-          bottom = pipe.gapY + pipe.gapSize / 2;
-        return (
-          circleIntersectsRect(this.bird, {
-            x: pipe.x,
-            y: 0,
-            width: CONFIG.pipeWidth,
-            height: top,
-          }) ||
-          circleIntersectsRect(this.bird, {
-            x: pipe.x,
-            y: bottom,
-            width: CONFIG.pipeWidth,
-            height: CONFIG.ground - bottom,
-          })
-        );
-      });
-    if (hit) {
+    const groundHit = this.bird.y + this.bird.radius >= CONFIG.ground;
+    const collisionPipe = this.pipes.pipes.find((pipe) => {
+      const top = pipe.gapY - pipe.gapSize / 2,
+        bottom = pipe.gapY + pipe.gapSize / 2;
+      return (
+        circleIntersectsRect(this.bird, {
+          x: pipe.x,
+          y: 0,
+          width: CONFIG.pipeWidth,
+          height: top,
+        }) ||
+        circleIntersectsRect(this.bird, {
+          x: pipe.x,
+          y: bottom,
+          width: CONFIG.pipeWidth,
+          height: CONFIG.ground - bottom,
+        })
+      );
+    });
+    if (groundHit || collisionPipe) {
+      this.failureCause = groundHit
+        ? this.windForce > 0
+          ? 'DOWNDRAFT LOAD'
+          : 'GROUND IMPACT'
+        : collisionPipe?.challenge.kind === 'valve'
+          ? 'MOVING VALVE'
+          : 'DUCT COLLISION';
       this.transition(GameState.GameOver);
       this.emit('collision');
       return;
     }
-    const gained = this.pipes.collectScore(this.bird.x);
-    if (gained) {
-      this.score += gained;
+    const results = this.pipes.collectClearances(this.bird.x, this.bird.y);
+    if (results.length) {
+      this.lastScoreDelta = 0;
+      for (const result of results) {
+        this.clearances++;
+        if (result.perfect) {
+          this.combo++;
+          this.bestCombo = Math.max(this.bestCombo, this.combo);
+        } else this.combo = 0;
+        const comboMultiplier = result.perfect
+          ? Math.min(1 + Math.floor((this.combo - 1) / 3), 3)
+          : 0;
+        this.lastScoreDelta +=
+          1 + comboMultiplier + (result.risk && result.perfect ? 1 : 0);
+      }
+      this.score += this.lastScoreDelta;
       this.emit('score');
     }
   }

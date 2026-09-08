@@ -53,7 +53,7 @@ try {
       storage.saveBest(game.score);
     if (event === 'collision') {
       restart.disabled = false;
-      status.textContent = `Test failed. Score ${game.score}. Best ${storage.getBest()}. Press Space to retry.`;
+      status.textContent = `Test failed: ${game.failureCause}. Score ${game.score}. Best ${storage.getBest()}. Press Space to retry.`;
       restart.textContent = '↗ RETRY TEST';
     }
     if (event === 'restart') {
