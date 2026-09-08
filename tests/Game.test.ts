@@ -60,6 +60,27 @@ it('fills an expanded viewport with upcoming pipes', () => {
     right - getDifficulty(0).spacing,
   );
 });
+it('keeps the seeded challenge schedule independent of viewport width', () => {
+  const sequence = (left: number, right: number) => {
+    const pipes = new PipeManager(new SeededRandom(19)),
+      challenges = new Map<number, string>();
+    pipes.setViewportBounds(left, right);
+    for (let tick = 0; tick < 5000 && challenges.size < 36; tick++) {
+      pipes.update(1 / 30, getDifficulty(0));
+      for (const pipe of pipes.pipes)
+        challenges.set(pipe.id, pipe.challenge.kind);
+    }
+    return [...challenges.entries()]
+      .sort(([a], [b]) => a - b)
+      .slice(0, 36)
+      .map(([, kind]) => kind);
+  };
+  const narrow = sequence(0, 432),
+    wide = sequence(-603.2, 1035.2);
+  expect(narrow).toHaveLength(36);
+  expect(wide).toEqual(narrow);
+  expect(new Set(narrow.slice(8))).not.toEqual(new Set(['standard']));
+});
 it('collision wins over scoring on the same tick', () => {
   const game = new Game(1);
   game.action();
@@ -126,6 +147,6 @@ it('awards the advertised two-point bonus for a perfect risk clearance', () => {
   game.update(1 / 120);
   expect(game.clearances).toBe(1);
   expect(game.combo).toBe(1);
-  expect(game.score).toBe(4);
   expect(game.lastScoreDelta).toBe(4);
+  expect(game.score).toBe(4);
 });

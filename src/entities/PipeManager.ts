@@ -35,7 +35,7 @@ export class PipeManager {
     this.viewportLeft = Math.min(0, left);
     this.viewportRight = Math.max(CONFIG.width, right);
   }
-  update(dt: number, difficulty: Difficulty, clearances = 0): void {
+  update(dt: number, difficulty: Difficulty): void {
     for (const pipe of this.pipes) {
       pipe.x -= difficulty.speed * dt;
       pipe.age += dt;
@@ -65,13 +65,14 @@ export class PipeManager {
         previousY + difficulty.maxGapDelta,
       );
       const gapY = this.random.range(min, max);
+      const id = this.nextId++;
       this.pipes.push({
-        id: this.nextId++,
+        id,
         x: last ? last.x + difficulty.spacing : CONFIG.initialPipeX,
         gapY,
         baseGapY: gapY,
         gapSize: difficulty.gap,
-        challenge: this.director.next(clearances),
+        challenge: this.director.next(id),
         phase: this.random.range(0, Math.PI * 2),
         age: 0,
         scored: false,
