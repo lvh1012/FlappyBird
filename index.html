@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#102d4b" />
+    <meta
+      name="description"
+      content="Pilot a questionable prototype through a hand-sketched wind tunnel. A deterministic Canvas flight experiment."
+    />
+    <title>FLAPPY // BLUEPRINT</title>
+  </head>
+  <body>
+    <main class="sheet">
+      <header>
+        <div class="mark">F/B</div>
+        <div>
+          <h1>FLAPPY <span>//</span> BLUEPRINT</h1>
+          <p>AERODYNAMIC TEST UNIT</p>
+        </div>
+        <span class="revision">FLIGHT LAB<br />REV. 02 / Mk.II</span>
+      </header>
+      <section class="instrument" aria-label="Flight experiment">
+        <div class="rail">
+          <span>EXPERIMENT 001 — WIND TUNNEL</span
+          ><span class="live">● SYSTEM READY</span>
+        </div>
+        <div class="viewport">
+          <canvas
+            id="game"
+            tabindex="0"
+            aria-label="Flappy Blueprint. Press Space or Arrow Up, or tap, to flap. Avoid ducts and the ground. Press P to pause."
+            >This game requires Canvas 2D and JavaScript.</canvas
+          >
+          <div id="fatal" role="alert" hidden></div>
+        </div>
+        <div class="controls">
+          <button id="restart" type="button">↗ START TEST</button
+          ><button id="pause" type="button" aria-pressed="false">Ⅱ PAUSE</button
+          ><button id="mute" type="button" aria-pressed="false">
+            ♪ SOUND ON
+          </button>
+        </div>
+      </section>
+      <footer>
+        <span>SPACE / ↑ / TAP TO FLAP</span><span>SAFETY FACTOR: 0.7</span>
+      </footer>
+      <p id="status" class="sr-only" role="status" aria-live="polite">
+        Ready to start.
+      </p>
+      <noscript>Enable JavaScript to run the flight experiment.</noscript>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
