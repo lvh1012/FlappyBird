@@ -21,7 +21,6 @@ export function fitWorldViewport(width: number, height: number) {
     throw new RangeError('Invalid viewport dimensions');
   const scale = Math.min(width / CONFIG.width, height / CONFIG.height),
     worldWidth = width / scale,
-    birdScreenX = Math.min(300, Math.max(CONFIG.birdX, worldWidth * 0.22)),
-    left = CONFIG.birdX - birdScreenX;
+    left = (CONFIG.width - worldWidth) / 2;
   return { scale, left, width: worldWidth, right: left + worldWidth };
 }

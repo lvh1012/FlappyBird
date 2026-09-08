@@ -42,8 +42,9 @@ describe('responsive logical world', () => {
     const result = fitWorldViewport(1920, 900);
     expect(result.scale).toBeCloseTo(900 / 768);
     expect(result.width).toBeCloseTo(1638.4);
-    expect(result.left).toBe(-180);
-    expect(result.right).toBeCloseTo(1458.4);
+    expect(result.left).toBeCloseTo(-603.2);
+    expect(result.right).toBeCloseTo(1035.2);
+    expect(120 - result.left).toBeCloseTo(result.width / 2 - 96);
   });
 
   it('rejects invalid logical viewport dimensions', () => {
