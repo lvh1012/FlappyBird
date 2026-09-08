@@ -38,6 +38,7 @@ src/utils/math.ts
 src/viewport/CanvasViewport.ts
 src/viewport/fitViewport.ts
 tests/Collision.test.ts
+tests/ColorContrast.test.ts
 tests/Difficulty.test.ts
 tests/Game.test.ts
 tests/GameLoop.test.ts
