@@ -4,7 +4,6 @@ import { CONFIG } from '../game/GameConfig';
 import type { Effects } from '../effects/Effects';
 import type { PipePair } from '../entities/PipeManager';
 import type { CanvasViewport } from '../viewport/CanvasViewport';
-import { BackgroundRenderer } from './BackgroundRenderer';
 import {
   CYAN,
   INK,
@@ -16,14 +15,10 @@ import {
 } from './BlueprintPrimitives';
 import { drawUi } from './UiRenderer';
 export class BlueprintRenderer {
-  private readonly background: BackgroundRenderer;
   constructor(
     private readonly c: CanvasRenderingContext2D,
     private readonly viewport: CanvasViewport,
-    seed: number,
-  ) {
-    this.background = new BackgroundRenderer(seed);
-  }
+  ) {}
   draw(game: Game, effects: Effects, best: number, paused: boolean): void {
     const c = this.c,
       left = this.viewport.left,
@@ -34,7 +29,6 @@ export class BlueprintRenderer {
     c.beginPath();
     c.rect(left, 0, width, CONFIG.height);
     c.clip();
-    this.background.draw(c, left, right);
     c.save();
     c.translate(effects.shake.offset, 0);
     c.lineWidth = 0.9;

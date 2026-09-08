@@ -63,7 +63,7 @@ try {
     if (event === 'flap') restart.textContent = '↗ RESTART';
   });
   const viewport = new CanvasViewport(canvas, c, stage),
-    renderer = new BlueprintRenderer(c, viewport, seed);
+    renderer = new BlueprintRenderer(c, viewport);
   // Vite removes this development-only dynamic import from production builds.
   let debug: import('./debug/DebugOverlay').DebugOverlay | undefined;
   if (import.meta.env.DEV)

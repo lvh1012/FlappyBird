@@ -30,7 +30,6 @@ src/main.ts
 src/physics/Collision.ts
 src/physics/Physics.ts
 src/random/SeededRandom.ts
-src/rendering/BackgroundRenderer.ts
 src/rendering/BlueprintPrimitives.ts
 src/rendering/BlueprintRenderer.ts
 src/rendering/UiRenderer.ts

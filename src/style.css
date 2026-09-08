@@ -31,9 +31,15 @@ body {
     max(10px, env(safe-area-inset-left));
   background-color: var(--paper);
   background-image:
+    radial-gradient(circle at 7px 11px, #5348300b 0 0.55px, transparent 0.8px),
+    radial-gradient(circle at 19px 5px, #53483008 0 0.45px, transparent 0.7px),
     linear-gradient(#405f8d17 1px, transparent 1px),
     linear-gradient(90deg, #405f8d17 1px, transparent 1px);
-  background-size: 24px 24px;
+  background-size:
+    31px 29px,
+    43px 37px,
+    24px 24px,
+    24px 24px;
 }
 .sheet:fullscreen {
   width: 100%;
@@ -106,6 +112,7 @@ canvas {
   z-index: -1;
   touch-action: none;
   pointer-events: auto;
+  background: transparent;
 }
 canvas:focus-visible {
   outline: 2px solid var(--ink);
