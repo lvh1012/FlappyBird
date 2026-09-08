@@ -1,5 +1,9 @@
 import { Bird } from '../entities/Bird';
-import { PipeManager } from '../entities/PipeManager';
+import {
+  PipeManager,
+  type ClearanceResult,
+  type PipePair,
+} from '../entities/PipeManager';
 import { circleIntersectsRect } from '../physics/Collision';
 import { flap, integrate } from '../physics/Physics';
 import { SeededRandom } from '../random/SeededRandom';
@@ -8,6 +12,12 @@ import { CONFIG } from './GameConfig';
 import { getDifficulty } from './Difficulty';
 import { GameState } from './GameState';
 export type GameEvent = 'flap' | 'score' | 'collision' | 'restart';
+export type FailureCause =
+  | 'STRUCTURAL FAILURE'
+  | 'DOWNDRAFT LOAD'
+  | 'GROUND IMPACT'
+  | 'MOVING VALVE'
+  | 'DUCT COLLISION';
 export class Game {
   private currentState = GameState.Ready;
   bird = new Bird();
@@ -18,7 +28,7 @@ export class Game {
   bestCombo = 0;
   lastScoreDelta = 1;
   windForce = 0;
-  failureCause = 'STRUCTURAL FAILURE';
+  failureCause: FailureCause = 'STRUCTURAL FAILURE';
   time = 0;
   groundOffset = 0;
   overAge = 0;
@@ -106,34 +116,41 @@ export class Game {
       );
     });
     if (groundHit || collisionPipe) {
-      this.failureCause = groundHit
-        ? this.windForce > 0
-          ? 'DOWNDRAFT LOAD'
-          : 'GROUND IMPACT'
-        : collisionPipe?.challenge.kind === 'valve'
-          ? 'MOVING VALVE'
-          : 'DUCT COLLISION';
+      this.failureCause = this.resolveFailureCause(groundHit, collisionPipe);
       this.transition(GameState.GameOver);
       this.emit('collision');
       return;
     }
     const results = this.pipes.collectClearances(this.bird.x, this.bird.y);
     if (results.length) {
-      this.lastScoreDelta = 0;
-      for (const result of results) {
-        this.clearances++;
-        if (result.perfect) {
-          this.combo++;
-          this.bestCombo = Math.max(this.bestCombo, this.combo);
-        } else this.combo = 0;
-        const comboMultiplier = result.perfect
-          ? Math.min(1 + Math.floor((this.combo - 1) / 3), 3)
-          : 0;
-        this.lastScoreDelta +=
-          1 + comboMultiplier + (result.risk && result.perfect ? 1 : 0);
-      }
-      this.score += this.lastScoreDelta;
+      this.awardClearances(results);
       this.emit('score');
     }
+  }
+  private resolveFailureCause(
+    groundHit: boolean,
+    collisionPipe: PipePair | undefined,
+  ): FailureCause {
+    if (groundHit)
+      return this.windForce > 0 ? 'DOWNDRAFT LOAD' : 'GROUND IMPACT';
+    return collisionPipe?.challenge.kind === 'valve'
+      ? 'MOVING VALVE'
+      : 'DUCT COLLISION';
+  }
+  private awardClearances(results: readonly ClearanceResult[]): void {
+    this.lastScoreDelta = 0;
+    for (const result of results) {
+      this.clearances++;
+      if (result.perfect) {
+        this.combo++;
+        this.bestCombo = Math.max(this.bestCombo, this.combo);
+      } else this.combo = 0;
+      const comboMultiplier = result.perfect
+        ? Math.min(1 + Math.floor((this.combo - 1) / 3), 3)
+        : 0;
+      this.lastScoreDelta +=
+        1 + comboMultiplier + (result.risk && result.perfect ? 1 : 0);
+    }
+    this.score += this.lastScoreDelta;
   }
 }

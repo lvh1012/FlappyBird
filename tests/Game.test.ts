@@ -41,9 +41,9 @@ it('scores each pair exactly once and keeps bounded unique pipes', () => {
   const ids = new Set<number>();
   for (let i = 0; i < 12000; i++) {
     pipes.update(1 / 120, getDifficulty(0));
-    const scored = pipes.collectScore(120);
+    const scored = pipes.collectClearances(120, 340).length;
     total += scored;
-    expect(pipes.collectScore(120)).toBe(0);
+    expect(pipes.collectClearances(120, 340)).toEqual([]);
     for (const pipe of pipes.pipes) ids.add(pipe.id);
     expect(pipes.pipes.length).toBeLessThanOrEqual(4);
   }

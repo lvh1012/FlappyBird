@@ -82,15 +82,6 @@ export class PipeManager {
       }
     return results;
   }
-  collectScore(birdX: number): number {
-    let score = 0;
-    for (const pipe of this.pipes)
-      if (!pipe.scored && pipe.x + CONFIG.pipeWidth < birdX) {
-        pipe.scored = true;
-        score++;
-      }
-    return score;
-  }
   windForceAt(x: number): number {
     const active = this.pipes
       .filter(
