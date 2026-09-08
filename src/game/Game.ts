@@ -92,7 +92,7 @@ export class Game {
       return;
     }
     const difficulty = getDifficulty(this.clearances);
-    this.pipes.update(dt, difficulty, this.clearances);
+    this.pipes.update(dt, difficulty);
     this.windForce = this.pipes.windForceAt(this.bird.x);
     integrate(this.bird, dt, this.windForce);
     this.groundOffset = (this.groundOffset + difficulty.speed * dt) % 48;
