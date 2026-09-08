@@ -1,5 +1,5 @@
 import type { Game } from '../game/Game';
-import { label } from '../rendering/BlueprintPrimitives';
+import { INK, RED, label } from '../rendering/BlueprintPrimitives';
 export class DebugOverlay {
   enabled = new URLSearchParams(location.search).get('debug') === '1';
   private frameTime = 16.7;
@@ -14,7 +14,7 @@ export class DebugOverlay {
   ): void {
     if (!this.enabled) return;
     if (delta > 0) this.frameTime = this.frameTime * 0.9 + delta * 1000;
-    c.fillStyle = 'rgba(0,0,0,0.85)';
+    c.fillStyle = 'rgba(245,240,218,0.97)';
     c.fillRect(8, 112, 265, 100);
     const rows = [
       `${(1000 / this.frameTime).toFixed(0)} FPS | ${this.frameTime.toFixed(1)} ms | ${game.state}`,
@@ -23,8 +23,8 @@ export class DebugOverlay {
       `SEED ${game.seed}`,
       `WORLD 432×768 | DPR ${dpr}`,
     ];
-    rows.forEach((row, i) => label(c, row, 15, 129 + i * 17, 11, '#e4f1e9'));
-    c.strokeStyle = '#ec9c87';
+    rows.forEach((row, i) => label(c, row, 15, 129 + i * 17, 11, INK));
+    c.strokeStyle = RED;
     c.beginPath();
     c.arc(game.bird.x, game.bird.y, game.bird.radius, 0, Math.PI * 2);
     c.stroke();

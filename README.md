@@ -19,6 +19,10 @@ npm run preview
 
 ## Điều khiển
 
+- Canvas phủ viewport, nét bút bi xanh trên giấy ngà. World vẫn giữ 9:16 và được clip để không lộ thêm pipe trên màn hình rộng.
+- Mobile portrait thu gọn chrome; landscape thấp chuyển controls sang bên phải. Nút Fullscreen chỉ hiện khi browser hỗ trợ, giữ controls trong fullscreen container.
+- Xoay màn hình hoặc chuyển Fullscreen khi đang chơi sẽ pause; chủ động Resume để tiếp tục. Restart trong lúc chơi chỉ khả dụng sau khi pause để tránh bấm nhầm.
+
 - Click/tap canvas rồi dùng Space, ArrowUp, chuột, touch hoặc pen để flap.
 - READY: flap bắt đầu ngay. GAME OVER: chờ 400 ms rồi flap để về READY.
 - P hoặc nút PAUSE/RESUME: tạm dừng. Chuyển tab tự dừng simulation; trạng thái pause thủ công được giữ.
@@ -75,7 +79,7 @@ Source được phát triển qua branch `feat/flappy-blueprint` và review bằ
 
 - `game/Game.ts` là simulation không phụ thuộc DOM/Canvas; phát callback typed cho flap, score, collision, restart. State transitions tập trung, collision được xử lý trước scoring.
 - `GameLoop` sở hữu duy nhất một RAF. Fixed step 1/120 giây, frame delta và accumulator cap 50 ms, tối đa 6 update mỗi frame. Lag dài làm simulation chậm lại thay vì cố catch-up. Resume xóa timestamp/accumulator.
-- World cố định 432×768; viewport tách CSS pixels, device pixels và logical coordinates. Resize không reset gameplay. DPR cap 4 để giới hạn bộ nhớ; `setTransform` tránh scale cộng dồn.
+- World cố định 432×768; viewport tách CSS pixels, device pixels và logical coordinates. Resize không reset gameplay và redraw khi pause. DPR tối đa 4, backing buffer tối đa 4 triệu pixels (~16 MB RGBA); `setTransform` tránh scale cộng dồn. CSS dùng dynamic viewport units và safe-area insets.
 - Bird dùng semi-implicit Euler, gravity 1500, flap -430, fall speed cap 850. Ceiling clamp y/velocity; ground và pipes gây game over. Collision circle radius 13 nhỏ hơn thân vẽ 23×18 để tạo độ dung sai.
 - Difficulty thuần theo bậc mỗi 10 score, speed 160–208 và gap 172–142. Gap center giới hạn thay đổi 115 px giữa hai pipe; gap của pipe đã spawn không thay đổi.
 - Seeded PRNG tách simulation, background và effects. Doodle offsets theo seed ổn định, background cache một lần. Cùng seed + input theo simulation tick + config tái lập simulation; không hứa cùng wall-clock input trên mọi frame rate.
