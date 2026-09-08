@@ -1,7 +1,7 @@
 :root {
   font-family: 'Courier New', monospace;
-  color: #244b9b;
-  background: #f5f0da;
+  color: #1e4f9a;
+  background: #ece6d2;
   color-scheme: light;
   font-synthesis: none;
 }
@@ -24,15 +24,32 @@ body {
   padding: max(8px, env(safe-area-inset-top))
     max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom))
     max(10px, env(safe-area-inset-left));
-  background-color: #f5f0da;
+  background-color: #ece6d2;
   background-image:
-    linear-gradient(#637fa912 1px, transparent 1px),
-    linear-gradient(90deg, #637fa912 1px, transparent 1px);
+    linear-gradient(#5576a817 1px, transparent 1px),
+    linear-gradient(90deg, #5576a817 1px, transparent 1px);
   background-size: 24px 24px;
 }
 .sheet:fullscreen {
   width: 100%;
   height: 100%;
+}
+.sheet::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 119px, #5576a81c 120px 121px),
+    linear-gradient(
+      90deg,
+      transparent calc(50% - 216px),
+      #5576a80d calc(50% - 216px) calc(50% - 215px),
+      transparent calc(50% - 215px) calc(50% + 215px),
+      #5576a80d calc(50% + 215px) calc(50% + 216px),
+      transparent calc(50% + 216px)
+    );
 }
 header {
   display: flex;
@@ -54,13 +71,13 @@ h1 {
 header p {
   margin: 4px 0 0;
   font-size: 12px;
-  color: #506b94;
+  color: #5576a8;
 }
 .revision {
   margin-left: auto;
   text-align: right;
   font-size: 12px;
-  color: #506b94;
+  color: #5576a8;
 }
 .instrument {
   min-height: 0;
@@ -72,7 +89,7 @@ header p {
   justify-content: space-between;
   gap: 12px;
   font-size: 12px;
-  color: #506b94;
+  color: #5576a8;
   padding: 0 8px 6px;
 }
 .viewport {
@@ -91,7 +108,7 @@ canvas {
   pointer-events: auto;
 }
 canvas:focus-visible {
-  outline: 2px solid #244b9b;
+  outline: 2px solid #1e4f9a;
   outline-offset: -4px;
 }
 .controls {
@@ -104,10 +121,10 @@ canvas:focus-visible {
 button {
   min-height: 44px;
   padding: 9px 14px;
-  border: 1px solid #637fa9;
+  border: 1px solid #5576a8;
   border-radius: 3px 6px 3px 5px;
-  background: #f5f0da;
-  color: #244b9b;
+  background: #ece6d2;
+  color: #1e4f9a;
   font:
     bold 13px 'Courier New',
     monospace;
@@ -117,7 +134,7 @@ button:hover {
   background: #e5e8d9;
 }
 button:focus-visible {
-  outline: 2px solid #244b9b;
+  outline: 2px solid #1e4f9a;
   outline-offset: 3px;
 }
 button:disabled {
@@ -133,7 +150,7 @@ footer {
   gap: 8px;
   padding: 8px;
   font-size: 12px;
-  color: #506b94;
+  color: #5576a8;
 }
 .rotate-hint {
   display: none;
@@ -150,7 +167,7 @@ footer {
   position: absolute;
   inset: 0;
   padding: 32px;
-  background: #f5f0da;
+  background: #ece6d2;
   color: #b04f48;
   z-index: 5;
   pointer-events: auto;
@@ -211,7 +228,7 @@ footer {
     bottom: max(12px, env(safe-area-inset-bottom));
     max-width: 100px;
     font-size: 12px;
-    color: #506b94;
+    color: #5576a8;
     pointer-events: none;
   }
 }

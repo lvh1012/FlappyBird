@@ -14,7 +14,7 @@ export class DebugOverlay {
   ): void {
     if (!this.enabled) return;
     if (delta > 0) this.frameTime = this.frameTime * 0.9 + delta * 1000;
-    c.fillStyle = 'rgba(245,240,218,0.97)';
+    c.fillStyle = 'rgba(236,230,210,0.97)';
     c.fillRect(8, 112, 265, 100);
     const rows = [
       `${(1000 / this.frameTime).toFixed(0)} FPS | ${this.frameTime.toFixed(1)} ms | ${game.state}`,

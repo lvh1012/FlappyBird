@@ -29,7 +29,7 @@ export class BackgroundRenderer {
     }
     const random = new SeededRandom(seed ^ 0xabc123);
     // Stable paper grain is generated once and never changes gameplay RNG.
-    c.fillStyle = 'rgba(111,94,56,0.045)';
+    c.fillStyle = 'rgba(83,72,48,0.055)';
     for (let i = 0; i < 1800; i++)
       c.fillRect(random.range(0, 432), random.range(0, 768), 0.7, 0.7);
     c.strokeStyle = FAINT;
