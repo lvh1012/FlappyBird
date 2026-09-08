@@ -36,7 +36,7 @@ npm run preview
 
 - 8 clearance đầu là onboarding, chỉ có static pipe.
 - Sau onboarding, `EventDirector` chọn deterministic challenge theo score-independent clearance progression: updraft, downdraft, precision route và oscillating valve.
-- Wind zone có vùng dashed, directional arrow và label trước khi lực tác động. Vertical force được cap để không phá physics bounds.
+- Wind zone có vùng dashed, label và các luồng nét bút chuyển động theo hướng lực trước khi tác động. Khi bật `prefers-reduced-motion`, animation chuyển thành indicator tĩnh. Vertical force được cap để không phá physics bounds.
 - Precision route là mục tiêu tùy chọn trong gap: clearance thường vẫn an toàn; bay qua target nhận perfect bonus và tăng combo.
 - Moving valve chỉ xuất hiện từ clearance 24 và luôn được theo sau bởi một recovery pipe.
 - Difficulty vật lý dựa trên clearance, không dựa trên bonus score. Vì vậy combo không làm game tăng tốc ngoài dự kiến.

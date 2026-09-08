@@ -36,7 +36,7 @@ export class BlueprintRenderer {
     c.translate(effects.shake.offset, 0);
     c.lineWidth = 0.9;
     for (const pipe of game.pipes.pipes) {
-      this.challengeField(pipe);
+      this.challengeField(pipe, game.time, effects.reducedMotion);
       const top = pipe.gapY - pipe.gapSize / 2,
         bottom = pipe.gapY + pipe.gapSize / 2;
       this.duct(pipe.x, 0, top, pipe.id, true);
@@ -108,13 +108,21 @@ export class BlueprintRenderer {
     drawUi(c, game, best, paused, effects.scoreAge);
     c.restore();
   }
-  private challengeField(pipe: PipePair): void {
+  private challengeField(
+    pipe: PipePair,
+    time: number,
+    reducedMotion: boolean,
+  ): void {
     const c = this.c,
       challenge = pipe.challenge;
     if (challenge.windForce === 0) return;
     const left = pipe.x - 145,
       width = CONFIG.pipeWidth + 145,
-      up = challenge.windForce < 0;
+      up = challenge.windForce < 0,
+      flowTop = 158,
+      flowBottom = CONFIG.ground - 42,
+      travel = flowBottom - flowTop,
+      speed = 0.2 + Math.abs(challenge.windForce) / 1800;
     c.save();
     c.fillStyle = 'rgba(64,95,141,0.045)';
     c.fillRect(left, 96, width, CONFIG.ground - 112);
@@ -122,13 +130,26 @@ export class BlueprintRenderer {
     c.setLineDash([7, 7]);
     c.strokeRect(left, 96, width, CONFIG.ground - 112);
     c.setLineDash([]);
-    for (let x = left + 24; x < left + width; x += 44) {
-      const from = up ? 570 : 170,
-        to = up ? 500 : 240;
-      sketchLine(c, x, from, x, to, pipe.id + Math.round(x));
-      sketchLine(c, x, to, x - 5, to + (up ? 8 : -8), pipe.id + 31);
-      sketchLine(c, x, to, x + 5, to + (up ? 8 : -8), pipe.id + 32);
+    for (let lane = 0; lane < 5; lane++) {
+      const baseX = left + 22 + lane * ((width - 44) / 4);
+      for (let stream = 0; stream < 2; stream++) {
+        const phase = lane * 0.173 + stream * 0.47,
+          progress = reducedMotion ? phase % 1 : (time * speed + phase) % 1,
+          y = up ? flowBottom - progress * travel : flowTop + progress * travel,
+          sway = reducedMotion
+            ? 0
+            : Math.sin(time * 3.2 + lane * 1.7 + stream * 2.1) * 5,
+          tipX = baseX + sway,
+          tipY = y + (up ? -32 : 32),
+          headY = tipY + (up ? 8 : -8),
+          seed = pipe.id * 41 + lane * 7 + stream * 3;
+        c.globalAlpha = 0.28 + Math.sin(progress * Math.PI) * 0.62;
+        sketchLine(c, baseX - sway * 0.35, y, tipX, tipY, seed);
+        sketchLine(c, tipX, tipY, tipX - 5, headY, seed + 1);
+        sketchLine(c, tipX, tipY, tipX + 5, headY, seed + 2);
+      }
     }
+    c.globalAlpha = 1;
     label(c, challenge.label, left + width / 2, 121, 10, CYAN, 'center');
     c.restore();
   }
