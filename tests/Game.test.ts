@@ -101,3 +101,31 @@ it('rewards precise clearance without accelerating difficulty progress', () => {
   expect(game.score).toBe(2);
   expect(game.lastScoreDelta).toBe(2);
 });
+it('awards the advertised two-point bonus for a perfect risk clearance', () => {
+  const game = new Game(3);
+  game.action();
+  game.bird.y = 310;
+  game.bird.velocityY = 0;
+  game.pipes.pipes.push({
+    id: 0,
+    x: 40,
+    gapY: 340,
+    baseGapY: 340,
+    gapSize: 172,
+    challenge: {
+      ...STANDARD_CHALLENGE,
+      kind: 'risk',
+      label: 'PRECISION ROUTE // HIGH',
+      targetOffset: -30,
+      perfectHalfHeight: 18,
+    },
+    phase: 0,
+    age: 0,
+    scored: false,
+  });
+  game.update(1 / 120);
+  expect(game.clearances).toBe(1);
+  expect(game.combo).toBe(1);
+  expect(game.score).toBe(4);
+  expect(game.lastScoreDelta).toBe(4);
+});

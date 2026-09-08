@@ -14,6 +14,17 @@ import {
   sketchRect,
 } from './BlueprintPrimitives';
 import { drawUi } from './UiRenderer';
+
+interface WindStreamContext {
+  readonly pipeId: number;
+  readonly time: number;
+  readonly reducedMotion: boolean;
+  readonly up: boolean;
+  readonly flowTop: number;
+  readonly flowBottom: number;
+  readonly speed: number;
+}
+
 export class BlueprintRenderer {
   constructor(
     private readonly c: CanvasRenderingContext2D,
@@ -118,7 +129,6 @@ export class BlueprintRenderer {
       up = challenge.windForce < 0,
       flowTop = 158,
       flowBottom = CONFIG.ground - 42,
-      travel = flowBottom - flowTop,
       speed = 0.2 + Math.abs(challenge.windForce) / 1800;
     c.save();
     c.fillStyle = 'rgba(64,95,141,0.045)';
@@ -127,28 +137,47 @@ export class BlueprintRenderer {
     c.setLineDash([7, 7]);
     c.strokeRect(left, 96, width, CONFIG.ground - 112);
     c.setLineDash([]);
+    const streamContext: WindStreamContext = {
+      pipeId: pipe.id,
+      time,
+      reducedMotion,
+      up,
+      flowTop,
+      flowBottom,
+      speed,
+    };
     for (let lane = 0; lane < 5; lane++) {
       const baseX = left + 22 + lane * ((width - 44) / 4);
-      for (let stream = 0; stream < 2; stream++) {
-        const phase = lane * 0.173 + stream * 0.47,
-          progress = reducedMotion ? phase % 1 : (time * speed + phase) % 1,
-          y = up ? flowBottom - progress * travel : flowTop + progress * travel,
-          sway = reducedMotion
-            ? 0
-            : Math.sin(time * 3.2 + lane * 1.7 + stream * 2.1) * 5,
-          tipX = baseX + sway,
-          tipY = y + (up ? -32 : 32),
-          headY = tipY + (up ? 8 : -8),
-          seed = pipe.id * 41 + lane * 7 + stream * 3;
-        c.globalAlpha = 0.28 + Math.sin(progress * Math.PI) * 0.62;
-        sketchLine(c, baseX - sway * 0.35, y, tipX, tipY, seed);
-        sketchLine(c, tipX, tipY, tipX - 5, headY, seed + 1);
-        sketchLine(c, tipX, tipY, tipX + 5, headY, seed + 2);
-      }
+      for (let stream = 0; stream < 2; stream++)
+        this.drawWindStream(baseX, lane, stream, streamContext);
     }
     c.globalAlpha = 1;
     label(c, challenge.label, left + width / 2, 121, 10, CYAN, 'center');
     c.restore();
+  }
+  private drawWindStream(
+    baseX: number,
+    lane: number,
+    stream: number,
+    context: WindStreamContext,
+  ): void {
+    const { pipeId, time, reducedMotion, up, flowTop, flowBottom, speed } =
+        context,
+      travel = flowBottom - flowTop,
+      phase = lane * 0.173 + stream * 0.47,
+      progress = reducedMotion ? phase % 1 : (time * speed + phase) % 1,
+      y = up ? flowBottom - progress * travel : flowTop + progress * travel,
+      sway = reducedMotion
+        ? 0
+        : Math.sin(time * 3.2 + lane * 1.7 + stream * 2.1) * 5,
+      tipX = baseX + sway,
+      tipY = y + (up ? -32 : 32),
+      headY = tipY + (up ? 8 : -8),
+      seed = pipeId * 41 + lane * 7 + stream * 3;
+    this.c.globalAlpha = 0.28 + Math.sin(progress * Math.PI) * 0.62;
+    sketchLine(this.c, baseX - sway * 0.35, y, tipX, tipY, seed);
+    sketchLine(this.c, tipX, tipY, tipX - 5, headY, seed + 1);
+    sketchLine(this.c, tipX, tipY, tipX + 5, headY, seed + 2);
   }
   private challengeMarker(pipe: PipePair): void {
     const c = this.c,

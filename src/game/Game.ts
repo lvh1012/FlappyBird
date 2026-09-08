@@ -149,7 +149,7 @@ export class Game {
         ? Math.min(1 + Math.floor((this.combo - 1) / 3), 3)
         : 0;
       this.lastScoreDelta +=
-        1 + comboMultiplier + (result.risk && result.perfect ? 1 : 0);
+        1 + comboMultiplier + (result.risk && result.perfect ? 2 : 0);
     }
     this.score += this.lastScoreDelta;
   }
