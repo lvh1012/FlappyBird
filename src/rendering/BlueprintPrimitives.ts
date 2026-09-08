@@ -1,9 +1,9 @@
 import { SeededRandom } from '../random/SeededRandom';
 export const INK = '#1E4F9A',
-  CYAN = '#5576A8',
-  FAINT = '#AAB8C9',
+  CYAN = '#405F8D',
+  FAINT = '#49658E',
   PAPER = '#ECE6D2',
-  RED = '#B04F48';
+  RED = '#993D39';
 // Geometry is a pure function of the primitive seed; no per-frame random jitter.
 export function sketchLine(
   c: CanvasRenderingContext2D,
